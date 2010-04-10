@@ -3,7 +3,7 @@ class PermitComponent extends Object {
 
 	var $sessionString = '';
 	var $controller = null;
-    var $session = null;
+    var $Session = null;
 
 /**
  * Array of routes connected with PermitComponent::access()
