@@ -1,9 +1,12 @@
 <?php
 class PermitComponent extends Object {
 
-	var $sessionString = '';
 	var $controller = null;
     var $Session = null;
+
+	var $settings = array(
+		'path' => 'User.User'
+	);
 
 /**
  * Array of routes connected with PermitComponent::access()
@@ -15,13 +18,15 @@ class PermitComponent extends Object {
 
 	var $redirect = '/';
 
-	function initialize(&$controller) {
+	function initialize(&$controller, $config = array()) {
 		$self =& PermitComponent::getInstance();
 		if (!include(CONFIGS . DS . 'permit.php')) {
 			trigger_error("File containing permissions not found.  It should be located at " . APP_PATH . DS . 'config' . DS . "permit.php", E_USER_ERROR);
 		}
 
 		$self->controller = $controller;
+
+		$self->settings = array_merge($config, $self->settings);
 
 		foreach ($self->routes as $route) {
 			if (PermitComponent::parse($controller->params, $route)) {
@@ -67,7 +72,7 @@ class PermitComponent extends Object {
 		if (!isset($route['rules']['auth'])) return;
 
 		if (is_bool($route['rules']['auth'])) {
-			$is_authed = $self->Session->read("{$self->sessionString}.group");
+			$is_authed = $self->Session->read("{$self->settings['path']}.group");
 
 			if ($route['rules']['auth'] == true && !$is_authed) {
 				$self->redirect($route);
@@ -81,7 +86,7 @@ class PermitComponent extends Object {
 		$count = count($route['rules']['auth']);
 		if ($count == 0) return;
 
-		if (($user = $self->Session->read("{$self->sessionString}")) == false) {
+		if (($user = $self->Session->read("{$self->settings['path']}")) == false) {
 			$self->redirect($route);
 		}
 
