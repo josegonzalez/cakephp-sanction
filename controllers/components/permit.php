@@ -5,7 +5,7 @@ class PermitComponent extends Object {
     var $Session = null;
 
 	var $settings = array(
-		'path' => 'User.User'
+		'path' => 'Auth.User'
 	);
 
 /**
