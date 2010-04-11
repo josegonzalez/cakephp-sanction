@@ -30,6 +30,31 @@ Create a file called @permit.php@ in your @app/config/@ folder. You'll need to d
 
 You can test those rules by browsing to the url you are protecting.
 
+h2. ClearanceHelper Setup
+
+Install the SanctionPlugin in your @app/plugins/@ folder under the @sanction@ folder.
+
+If you want to use the ClearanceHelper to block user access to controllers/actions, add the following to your AppController or a specific Controller:
+
+<pre><code>
+	// Example for default AuthComponent Configuration
+	var $helpers = array('Sanction.Clearance' => array('Auth.User'));
+
+	// Example for default AuthsomeComponent Configuration
+	var $helpers = array('Sanction.Clearance' => array('User.User'));
+</code></pre>
+
+Then you will want to setup some permissions...
+
+Create a file called @permit.php@ in your @app/config/@ folder. You'll need to do the following:
+
+# Add @App::import('Component', 'PermitComponent');@
+# Define some rules (these will be outlined below)
+
+Then create links in your views using @$this->Clearance->link()@ instead of @$this->Html->link()@. If the currently logged in user (or not logged in user) has access as defined by the @app/config/permit.php@ file, then the link will appear in whatever view the ClearanceHelper was created in.
+
+Note that checking against the @app/config/permit.php@ file is an expensive operation (for now!), so you might want to use this on links that will actually vary when displayed to different users, as opposed to all links in your application.
+
 h2. Rules
 
 Rules are defined by @Permit::access();@ and can contain 3 arrays:
@@ -99,3 +124,7 @@ For the above, the following actions will be affected:
 * /comments/add/*
 
 The user must authenticated, and if they are not, they will be redirected to @/users/login@. A flash message will also be presented to them which will contain the message '@You must be logged in to comment@'.
+
+h2. License
+
+The Sanction Plugin is offered under an MIT license.
