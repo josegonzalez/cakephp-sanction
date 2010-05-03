@@ -5,7 +5,8 @@ class PermitComponent extends Object {
 	var $Session = null;
 
 	var $settings = array(
-		'path' => 'Auth.User'
+		'path' => 'Auth.User',
+		'check' => 'group'
 	);
 
 /**
@@ -70,7 +71,7 @@ class PermitComponent extends Object {
 		if (!isset($route['rules']['auth'])) return;
 
 		if (is_bool($route['rules']['auth'])) {
-			$is_authed = $self->Session->read("{$self->settings['path']}.group");
+			$is_authed = $self->Session->read("{$self->settings['path']}.{$self->settings['check']}");
 
 			if ($route['rules']['auth'] == true && !$is_authed) {
 				$self->redirect($route);
