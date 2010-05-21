@@ -15,10 +15,10 @@ If you want to use the PermitComponent to block user access to controllers/actio
 
 <pre><code>
 	// Example for default AuthComponent Configuration
-	var $components = array('Sanction.Permit' => array('Auth.User'));
+	var $components = array('Sanction.Permit' => array('path' => 'Auth.User'));
 
 	// Example for default AuthsomeComponent Configuration
-	var $components = array('Sanction.Permit' => array('User.User'));
+	var $components = array('Sanction.Permit' => array('path' => 'User.User'));
 </code></pre>
 
 Then you will want to setup some permissions...
