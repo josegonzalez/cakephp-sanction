@@ -38,10 +38,10 @@ If you want to use the ClearanceHelper to block user access to controllers/actio
 
 <pre><code>
 	// Example for default AuthComponent Configuration
-	var $helpers = array('Sanction.Clearance' => array('Auth.User'));
+	var $helpers = array('Sanction.Clearance' => array('path' => 'Auth.User'));
 
 	// Example for default AuthsomeComponent Configuration
-	var $helpers = array('Sanction.Clearance' => array('User.User'));
+	var $helpers = array('Sanction.Clearance' => array('path' => 'User.User'));
 </code></pre>
 
 Then you will want to setup some permissions...
