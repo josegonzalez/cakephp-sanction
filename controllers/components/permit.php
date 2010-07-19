@@ -2,11 +2,12 @@
 class PermitComponent extends Object {
 
 	var $controller = null;
-	var $Session = null;
+	var $session = null;
+	var $executed = null;
 
 	var $settings = array(
 		'path' => 'Auth.User',
-		'check' => 'group'
+		'check' => 'group_id'
 	);
 
 /**
@@ -16,8 +17,6 @@ class PermitComponent extends Object {
  * @access public
  */
 	var $routes = array();
-
-	var $redirect = '/';
 
 	function initialize(&$controller, $config = array()) {
 		$self =& PermitComponent::getInstance();
@@ -57,6 +56,7 @@ class PermitComponent extends Object {
 
 	function execute($route) {
 		$self =& PermitComponent::getInstance();
+		$self->executed = $route;
 		$self = $self->initializeSessionComponent($self);
 
 		if (empty($route['rules'])) return;
@@ -71,8 +71,8 @@ class PermitComponent extends Object {
 		if (!isset($route['rules']['auth'])) return;
 
 		if (is_bool($route['rules']['auth'])) {
-			$is_authed = $self->Session->read("{$self->settings['path']}.{$self->settings['check']}");
-
+			$is_authed = $self->session->read("{$self->settings['path']}.{$self->settings['check']}");
+			
 			if ($route['rules']['auth'] == true && !$is_authed) {
 				$self->redirect($route);
 			}
@@ -85,13 +85,21 @@ class PermitComponent extends Object {
 		$count = count($route['rules']['auth']);
 		if ($count == 0) return;
 
-		if (($user = $self->Session->read("{$self->settings['path']}")) == false) {
+		if (($user = $self->session->read("{$self->settings['path']}")) == false) {
 			$self->redirect($route);
 		}
 
 		foreach ($route['rules']['auth'] as $field => $value) {
-			if ($user[$field] == $value) {
-				$count--;
+			if(is_array($value)){
+				foreach ($value as $condition){
+					if ($user[$field] == $condition) {
+						$count--;
+					}
+				}
+			}else{
+				if ($user[$field] == $value) {
+					$count--;
+				}
 			}
 		}
 
@@ -107,24 +115,24 @@ class PermitComponent extends Object {
 			$message = $route['message'];
 			$element = $route['element'];
 			$params = $route['params'];
-			$self->Session->write("Message.{$route['key']}", compact('message', 'element', 'params'));
+			$self->session->write("Message.{$route['key']}", compact('message', 'element', 'params'));
 		}
 		$self->controller->redirect($route['redirect']);
 	}
 
 	function initializeSessionComponent(&$self) {
-		if ($self->Session != null) return $self;
+		if ($self->session != null) return $self;
 
 		App::import('Component', 'Session');
 		$componentClass = 'SessionComponent';
-		$self->Session =& new $componentClass(null);
+		$self->session =& new $componentClass(null);
 
-		if (method_exists($self->Session, 'initialize')) {
-			$self->Session->initialize($self->controller);
+		if (method_exists($self->session, 'initialize')) {
+			$self->session->initialize($self->controller);
 		}
 
-		if (method_exists($self->Session, 'startup')) {
-            $self->Session->startup($self->controller);
+		if (method_exists($self->session, 'startup')) {
+            $self->session->startup($self->controller);
 		}
 
 		return $self;
@@ -158,7 +166,7 @@ class Permit extends Object{
 		$self =& Permit::getInstance();
 		if (empty($rules)) return $permitComponent->routes;
 
-		$redirect = array_merge(array('redirect' => $this->redirect,
+		$redirect = array_merge(array('redirect' => $self->redirect,
 									'message' => __('Access denied', true),
 									'trace' => false,
 									'element' => 'default',
