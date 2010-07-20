@@ -7,7 +7,7 @@ class PermitComponent extends Object {
 
 	var $settings = array(
 		'path' => 'Auth.User',
-		'check' => 'group'
+		'check' => 'group_id'
 	);
 
 /**
@@ -90,8 +90,16 @@ class PermitComponent extends Object {
 		}
 
 		foreach ($route['rules']['auth'] as $field => $value) {
-			if ($user[$field] == $value) {
-				$count--;
+			if(is_array($value)){
+				foreach ($value as $condition){
+					if ($user[$field] == $condition) {
+						$count--;
+					}
+				}
+			}else{
+				if ($user[$field] == $value) {
+					$count--;
+				}
 			}
 		}
 
