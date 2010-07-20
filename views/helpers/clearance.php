@@ -101,7 +101,7 @@ class ClearanceHelper extends AppHelper {
 		if (empty($this->routes)) return $this->Html->link($title, $url, $options, $confirmMessage);
 
 		foreach ($this->routes as $route) {
-			if ($this->parse($url, $route['route'])) {
+			if ($this->parse($url, $route)) {
 				return $this->execute($route, $title, $url, $options, $confirmMessage);
 				break;
 			}
@@ -120,7 +120,9 @@ class ClearanceHelper extends AppHelper {
  * @access public
  * @author Jose Diaz-Gonzalez
  */
-	function parse(&$currentRoute, &$route) {
+	function parse(&$currentRoute, &$permit) {
+		$route = $permit['route'];
+
 		$count = count($route);
 		if ($count == 0) return false;
 
