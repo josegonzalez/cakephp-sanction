@@ -14,11 +14,32 @@ Install the SanctionPlugin in your @app/plugins/@ folder under the @sanction@ fo
 If you want to use the PermitComponent to block user access to controllers/actions, add the following to your AppController or a specific Controller:
 
 <pre><code><?php
-// Example for default AuthComponent Configuration
+/**
+* the 'path' key defines the Session key which holds user information (default Auth.User)
+* the 'check' key defined the subfield of the path, used to verify only that someone is logged in (default: id)
+*/
+
+
+// Example for default AuthComponent Configuration (with associated models)
+var $components = array('Sanction.Permit' => array('path' => 'Auth'));
+// Example for default AuthComponent Configuration (no associated models, restricted to just looking at the User model)
 var $components = array('Sanction.Permit' => array('path' => 'Auth.User'));
 
-// Example for default AuthsomeComponent Configuration
+// Example for default AuthsomeComponent Configuration (with associated models)
+var $components = array('Sanction.Permit' => array('path' => 'User'));
+// Example for default AuthsomeComponent Configuration (no associated models, restricted to just looking at the User model) 
 var $components = array('Sanction.Permit' => array('path' => 'User.User'));
+
+// Example for customized AuthsomeComponent Configuration (with associated models)
+var $components = array(
+	'Authsome.Authsome' => array(
+		'model' => 'Member',
+		'configureKey' => 'MemberAuth',
+		'sessionKey' => 'MemberAuth',
+		'cookieKey' => 'MemberAuth',
+		),
+	'Sanction.Permit' => array('path' => 'MemberAuth')
+	);
 ?>
 </code></pre>
 
@@ -38,11 +59,8 @@ Install the SanctionPlugin in your @app/plugins/@ folder under the @sanction@ fo
 If you want to use the ClearanceHelper to block user access to controllers/actions, add the following to your AppController or a specific Controller:
 
 <pre><code><?php
-// Example for default AuthComponent Configuration
-var $helpers = array('Sanction.Clearance' => array('path' => 'Auth.User'));
-
-// Example for default AuthsomeComponent Configuration
-var $helpers = array('Sanction.Clearance' => array('path' => 'User.User'));
+// Example (use the same {{$PATH}} as in the component)
+var $helpers = array('Sanction.Clearance' => array('path' => '{{$PATH}}'));
 ?>
 </code></pre>
 
@@ -64,16 +82,9 @@ Included in the Sanction plugin is a debug_kit panel (as of commit fb061e57) whi
 To use it, add the following to your AppController:
 
 <pre><code><?php
-// Example for default AuthComponent Configuration
+// Example of how to implement the Sanction pannel
 var $components = array(
 	'DebugKit.Toolbar' => array('panels' => array('Sanction.permit')),
-	'Sanction.Permit' => array('path' => 'Auth.User')
-);
-
-// Example for default AuthsomeComponent Configuration
-var $components = array(
-	'DebugKit.Toolbar' => array('panels' => array('Sanction.permit')),
-	'Sanction.Permit' => array('path' => 'User.User')
 );
 ?>
 </code></pre>
@@ -86,6 +97,8 @@ Rules are defined by @Permit::access();@ and can contain 3 arrays:
 
 * Array of rules upon which we will control access
 * Array of rules by which the User's session must be defined by
+** If you restrict to a single model and don't use associated data, you can enter just the fieldname to match on in the Auth array
+** If you use associated models, you need to specify a @set::extract()@ path as the fieldname
 * Array of extra parameters, such as where to redirect, the flash message, etc.
 
 An example @app/config/permit.php@:
@@ -93,9 +106,16 @@ An example @app/config/permit.php@:
 <pre><code><?php
 App::import('Component', 'PermitComponent');
 
+// no associated model, example: looks for $sessionUser['group'] == 'admin'
 Permit::access(
 	array('controller' => 'posts', 'action' => array('add', 'edit', 'delete')),
 	array('auth' => array('group' => 'admin')),
+	array('redirect' => array('controller' => 'users', 'action' => 'login')));
+
+// with associated model, example: looks for in_array('admin',set::extract('/Group/name',$sessionUser))
+Permit::access(
+	array('controller' => 'posts', 'action' => array('add', 'edit', 'delete')),
+	array('auth' => array('/Group/name' => 'admin')),
 	array('redirect' => array('controller' => 'users', 'action' => 'login')));
 ?>
 </code></pre>
@@ -111,6 +131,7 @@ The user must be in the group @admin@, and if they are not, they will be redirec
 <pre><code><?php
 App::import('Component', 'PermitComponent');
 
+// no associated model, example: looks for $sessionUser['group'] == 'admin'
 Permit::access(
 	array('controller' => 'comments', 'action' => array('edit', 'delete')),
 	array('auth' => array('group' => 'admin')),
@@ -146,6 +167,29 @@ For the above, the following actions will be affected:
 * /comments/add/*
 
 The user must authenticated, and if they are not, they will be redirected to @/users/login@. A flash message will also be presented to them which will contain the message '@You must be logged in to comment@'.
+
+
+<pre><code><?php
+App::import('Component', 'PermitComponent');
+
+// no associated model, example: looks for $sessionUser['group'] == 'admin'
+Permit::access(
+	array('prefix' => 'admin'),
+	array('auth' => array('group' => 'admin')),
+	array('redirect' => array('admin' => false, 'controller' => 'users', 'action' => 'login')));
+
+// with associated model, example: looks for in_array('admin',set::extract('/Group/name',$sessionUser))
+Permit::access(
+	array('prefix' => 'admin'),
+	array('auth' => array('/Group/name' => 'admin')),
+	array('redirect' => array('admin' => false, 'controller' => 'users', 'action' => 'login')));
+?>
+</code></pre>
+
+For the above, any route with an admin prefix would be affected.
+
+The user must be in the group @admin@, and if they are not, they will be redirected to @/users/login@.
+
 
 h2. License
 

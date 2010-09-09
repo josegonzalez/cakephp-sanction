@@ -84,7 +84,7 @@ class PermitTestController extends Controller {
  * @var array
  * @access public
  */
-	var $components = array('Sanction.Permit', 'Session');
+	var $components = array('Sanction.Permit' => array('path' => 'MockAuthTest'), 'Session');
 
 /**
  * testUrl property
@@ -242,6 +242,30 @@ class PermitTest extends CakeTestCase {
 
 		$this->Controller->Session->delete('Auth');
 		$this->Controller->Session->delete('Message.auth');
+		$this->Controller->Session->write('MockAuthTest',array(
+			'User' => array(
+				'id' => 'user-logged-in',
+				'email' => 'loggedin@domain.com',
+				'group' => 'member',
+				),
+			'Role' => array(
+				'id' => 'single-1',
+				'name' => 'singleAssociation',
+				'description' => 'hasOne or belongsTo association',
+				),
+			'Group' => array(
+				0 => array(
+					'id' => 'habtm-1',
+					'name' => 'admin',
+					'description' => 'HABTM association',
+					),
+				1 => array(
+					'id' => 'habtm-2',
+					'name' => 'editors',
+					'description' => 'HABTM association',
+					),
+				),
+			));
 
 		Router::reload();
 
@@ -299,6 +323,76 @@ class PermitTest extends CakeTestCase {
 
 		$testRoute = array('controller' => 'posts', 'action' => array('add', 'edit', 'delete'));
 		$this->assertFalse($this->Controller->Permit->parse($testRoute));
+	}
+	
+	/**
+	* Setup a simple, single dim path/check
+	* but will not be able to check on associated data
+	*/
+	function testExceuteAsSubpathUser() {
+		$self =& PermitComponent::getInstance();
+		$self->settings['path'] = 'MockAuthTest.User';
+		$self->settings['check'] = 'id';
+		# test bool, is logged in
+		$testRoute = array('rules' => array('auth' => true));
+		$this->assertFalse($this->Controller->Permit->execute($testRoute));
+		
+		# test single field matches (false response = authorized)
+		$testRoute = array('rules' => array('auth' => array('group' => 'member')));
+		$this->assertFalse($this->Controller->Permit->execute($testRoute));
+		$testRoute = array('rules' => array('auth' => array('group' => 'nonmember')));
+		$this->assertTrue($this->Controller->Permit->execute($testRoute));
+		
+		$testRoute = array('rules' => array('auth' => array('id' => 'user-logged-in')));
+		$this->assertFalse($this->Controller->Permit->execute($testRoute));
+		$testRoute = array('rules' => array('auth' => array('id' => 'user-alt')));
+		$this->assertTrue($this->Controller->Permit->execute($testRoute));
+		$testRoute = array('rules' => array('auth' => array('id' => '*user*')));
+		$this->assertTrue($this->Controller->Permit->execute($testRoute));
+		$testRoute = array('rules' => array('auth' => array('id' => '%user%')));
+		$this->assertTrue($this->Controller->Permit->execute($testRoute));
+	}
+	/**
+	* Setup a full, milti dim path/check
+	* WILL be able to check on associated data
+	*/
+	function testExceuteAsUser() {
+		$self =& PermitComponent::getInstance();
+		$self->settings['path'] = 'MockAuthTest';
+		$self->settings['check'] = 'User.id';
+		# test bool, is logged in
+		$testRoute = array('rules' => array('auth' => true));
+		$this->assertFalse($this->Controller->Permit->execute($testRoute));
+		
+		# test single field matches (false response = authorized)
+		$testRoute = array('rules' => array('auth' => array('/User/group' => 'member')));
+		$this->assertFalse($this->Controller->Permit->execute($testRoute));
+		$testRoute = array('rules' => array('auth' => array('/User/group' => 'nonmember')));
+		$this->assertTrue($this->Controller->Permit->execute($testRoute));
+		
+		$testRoute = array('rules' => array('auth' => array('/User/id' => 'user-logged-in')));
+		$this->assertFalse($this->Controller->Permit->execute($testRoute));
+		$testRoute = array('rules' => array('auth' => array('/User/id' => 'user-alt')));
+		$this->assertTrue($this->Controller->Permit->execute($testRoute));
+		$testRoute = array('rules' => array('auth' => array('/User/id' => '*user*')));
+		$this->assertTrue($this->Controller->Permit->execute($testRoute));
+		$testRoute = array('rules' => array('auth' => array('/User/id' => '%user%')));
+		$this->assertTrue($this->Controller->Permit->execute($testRoute));
+		
+		$testRoute = array('rules' => array('auth' => array('/Role/name' => 'singleAssociation')));
+		$this->assertFalse($this->Controller->Permit->execute($testRoute));
+		$testRoute = array('rules' => array('auth' => array('/Role/name' => 'something-else')));
+		$this->assertTrue($this->Controller->Permit->execute($testRoute));
+		
+		$testRoute = array('rules' => array('auth' => array('/Group/name' => 'admin')));
+		$this->assertFalse($this->Controller->Permit->execute($testRoute));
+		$testRoute = array('rules' => array('auth' => array('/Group/name' => 'editors')));
+		$this->assertFalse($this->Controller->Permit->execute($testRoute));
+		$testRoute = array('rules' => array('auth' => array('/Group/description' => 'HABTM association')));
+		$this->assertFalse($this->Controller->Permit->execute($testRoute));
+		$testRoute = array('rules' => array('auth' => array('/Group/name' => 'something-else')));
+		$this->assertTrue($this->Controller->Permit->execute($testRoute));
+		
 	}
 }
 ?>

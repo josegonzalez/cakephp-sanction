@@ -7,7 +7,7 @@ class PermitComponent extends Object {
 
 	var $settings = array(
 		'path' => 'Auth.User',
-		'check' => 'group_id'
+		'check' => 'id'
 	);
 
 /**
@@ -84,18 +84,22 @@ class PermitComponent extends Object {
 
 		$count = count($route['rules']['auth']);
 		if ($count == 0) return false;
-
 		if (($user = $self->session->read("{$self->settings['path']}")) == false) {
 			return true;
 		}
-
 		foreach ($route['rules']['auth'] as $field => $value) {
 			if (!is_array($value)) $value = (array) $value;
-			foreach ($value as $condition) {
-				if ($user[$field] == $condition) $count--;
+			if ($field[0]=="/") {
+				$values = (array) set::extract($field,$user);
+				foreach ($value as $condition) {
+					if (in_array($condition,$values)) $count--;
+				}
+			} else {
+				foreach ($value as $condition) {
+					if ($user[$field] == $condition) $count--;
+				}
 			}
 		}
-
 		if ($count != 0) return true;
 	}
 
