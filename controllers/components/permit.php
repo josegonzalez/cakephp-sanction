@@ -4,6 +4,7 @@ class PermitComponent extends Object {
 	var $controller = null;
 	var $session = null;
 	var $executed = null;
+	var $user = null;
 
 	var $settings = array(
 		'path' => 'Auth.User',
@@ -83,20 +84,21 @@ class PermitComponent extends Object {
 		}
 
 		$count = count($route['rules']['auth']);
-		if ($count == 0) return false;
-		if (($user = $self->session->read("{$self->settings['path']}")) == false) {
+		if ($count == 0) { return false; }
+		if (($this->user = $self->session->read("{$self->settings['path']}")) == false) {
 			return true;
 		}
 		foreach ($route['rules']['auth'] as $field => $value) {
-			if (!is_array($value)) $value = (array) $value;
+			if (!is_array($value)) { $value = (array) $value; }
+			if (strpos($field,'.')!==false) { $field = '/'.str_replace('.','/',$field); }
 			if ($field[0]=="/") {
-				$values = (array) set::extract($field,$user);
+				$values = (array) set::extract($field,$this->user);
 				foreach ($value as $condition) {
-					if (in_array($condition,$values)) $count--;
+					if (in_array($condition,$values)) { $count--; }
 				}
 			} else {
 				foreach ($value as $condition) {
-					if ($user[$field] == $condition) $count--;
+					if ($this->user[$field] == $condition) { $count--; }
 				}
 			}
 		}
