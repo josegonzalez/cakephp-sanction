@@ -21,12 +21,14 @@ If you want to use the PermitComponent to block user access to controllers/actio
 
 
 // Example for default AuthComponent Configuration (with associated models)
-var $components = array('Sanction.Permit' => array('path' => 'Auth'));
+var $components = array('Sanction.Permit' => array('path' => 'Auth', 'check' => 'Auth.id'));
+
 // Example for default AuthComponent Configuration (no associated models, restricted to just looking at the User model)
 var $components = array('Sanction.Permit' => array('path' => 'Auth.User'));
 
 // Example for default AuthsomeComponent Configuration (with associated models)
-var $components = array('Sanction.Permit' => array('path' => 'User'));
+var $components = array('Sanction.Permit' => array('path' => 'User', 'check' => 'User.id'));
+
 // Example for default AuthsomeComponent Configuration (no associated models, restricted to just looking at the User model) 
 var $components = array('Sanction.Permit' => array('path' => 'User.User'));
 
@@ -115,7 +117,7 @@ Permit::access(
 // with associated model, example: looks for in_array('admin',set::extract('/Group/name',$sessionUser))
 Permit::access(
 	array('controller' => 'posts', 'action' => array('add', 'edit', 'delete')),
-	array('auth' => array('/Group/name' => 'admin')),
+	array('auth' => array('Group.name' => 'admin')),
 	array('redirect' => array('controller' => 'users', 'action' => 'login')));
 ?>
 </code></pre>
@@ -126,7 +128,7 @@ For the above, the following actions will be affected:
 * /posts/edit/*
 * /posts/delete/*
 
-The user must be in the group @admin@, and if they are not, they will be redirected to @/users/login@.
+The user must have be in the @admin@ group (first example as a field on the user model, second as an assocaited Group model), and if they are not, they will be redirected to @/users/login@.
 
 <pre><code><?php
 App::import('Component', 'PermitComponent');
@@ -148,7 +150,7 @@ For the above, the following actions will be affected:
 * /comments/edit/*
 * /comments/delete/*
 
-The user must be in the group @admin@, and if they are not, they will be redirected to @/users/login@. A flash message at the key @flash@ using the @comment@ element will also be displayed, which will contain the message '@You must be logged in to comment@'.
+The user must have a field 'group' with a value of @admin@, and if they do not, they will be redirected to @/users/login@. A flash message at the key @flash@ using the @comment@ element will also be displayed, which will contain the message '@You must be logged in to comment@'.
 
 <pre><code><?php
 App::import('Component', 'PermitComponent');
@@ -181,7 +183,7 @@ Permit::access(
 // with associated model, example: looks for in_array('admin',set::extract('/Group/name',$sessionUser))
 Permit::access(
 	array('prefix' => 'admin'),
-	array('auth' => array('/Group/name' => 'admin')),
+	array('auth' => array('Group.name' => 'admin')),
 	array('redirect' => array('admin' => false, 'controller' => 'users', 'action' => 'login')));
 ?>
 </code></pre>
