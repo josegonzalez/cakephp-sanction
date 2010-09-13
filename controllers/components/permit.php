@@ -48,7 +48,7 @@ class PermitComponent extends Object {
 			if (isset($self->controller->params[$key])) {
 				$values = (is_array($value)) ?  $value : array($value);
 				foreach ($values as $k => $v) {
-					if ($self->controller->params[$key] == $v) {
+					if (strtolower($self->controller->params[$key]) == strtolower($v)) {
 						$count--;
 					}
 				}
