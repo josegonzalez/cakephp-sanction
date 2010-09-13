@@ -435,5 +435,77 @@ class PermitTest extends CakeTestCase {
 		$testRoute = array('rules' => array('auth' => array('/Group/name' => 'something-else')));
 		$this->assertTrue($this->Controller->Permit->execute($testRoute));
 	}
+
+	function testRedirect() {
+		$this->Controller->Permit->settings['path'] = 'MockAuthTest';
+		$this->Controller->Permit->settings['check'] = 'User.id';
+
+		# test bool, is logged in
+		$testRoute = array(
+			'route' => array('controller' => 'posts', 'action' => array('add', 'edit', 'delete')),
+			'rules' => array('auth' => array('group' => 'admin')),
+			'redirect' => array('controller' => 'users', 'action' => 'login'),
+			'message' => __('Access denied', true),
+			'element' => 'error',
+			'params' => array(),
+			'key' => 'flash',
+		);
+
+		$this->assertTrue($this->Controller->Permit->execute($testRoute));
+
+		$this->Controller->Permit->redirect($testRoute);
+		$this->assertEqual($this->Controller->testUrl, '/users/login');
+
+		$session = $this->Controller->Session->read('Message');
+		$this->assertEqual($session['flash']['message'], __('Access denied', true));
+		$this->assertEqual($session['flash']['element'], 'error');
+		$this->assertEqual(count($session['flash']['params']), 0);
+	}
+
+	function testPermitObject() {
+		$permit = Permit::getInstance();
+		$this->assertEqual(count($permit->clearances), 0);
+
+		Permit::access(
+			array('controller' => 'posts', 'action' => array('add', 'edit', 'delete')),
+			array('auth' => true),
+			array('redirect' => array('controller' => 'users', 'action' => 'login'))
+		);
+		$this->assertEqual(count($permit->clearances), 1);
+
+		Permit::access(
+			array('controller' => 'users'),
+			array('auth' => true),
+			array(
+				'element' => 'auth_error',
+				'redirect' => array('controller' => 'users', 'action' => 'login')
+			)
+		);
+		$this->assertEqual(count($permit->clearances), 2);
+
+		$expected = array(
+			'route' => array('controller' => 'posts', 'action' => array('add', 'edit', 'delete')),
+			'rules' => array('auth' => array('group' => 'admin')),
+			'redirect' => array('controller' => 'users', 'action' => 'login'),
+			'message' => __('Access denied', true),
+			'element' => 'default',
+			'params' => array(),
+			'key' => 'flash',
+		);
+		$this->assertEqual(current($permit->clearances), $expected);
+		reset($permit->clearances);
+
+		$expected = array(
+			'route' => array('controller' => 'users'),
+			'rules' => array('auth' => true),
+			'redirect' => array('controller' => 'users', 'action' => 'login'),
+			'message' => __('Access denied', true),
+			'element' => 'auth_error',
+			'params' => array(),
+			'key' => 'flash',
+		);
+		$this->assertEqual(end($permit->clearances), $expected);
+		reset($permit->clearances);
+	}
 }
 ?>
