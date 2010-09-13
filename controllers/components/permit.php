@@ -126,7 +126,6 @@ class Permit extends Object{
 
 		$redirect = array_merge(array('redirect' => $self->redirect,
 									'message' => __('Access denied', true),
-									'trace' => false,
 									'element' => 'default',
 									'params' => array(),
 									'key' => 'flash'),
@@ -140,7 +139,6 @@ class Permit extends Object{
 			'element' => $redirect['element'],
 			'params' => $redirect['params'],
 			'key' => $redirect['key'],
-			'trace' => $redirect['trace']
 		);
 
 		$self->clearances[] = $newRoute;
