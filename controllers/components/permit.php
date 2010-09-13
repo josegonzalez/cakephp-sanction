@@ -27,10 +27,11 @@ class PermitComponent extends Object {
 		}
 
 		$this->controller = $controller;
-
+		
+		$this->settings = array_merge($this->settings, $permit->settings);
 		$this->settings = array_merge($this->settings, $config);
-
-		foreach ($permit->routes as $route) {
+		
+		foreach ($permit->clearances as $route) {
 			if ($this->parse($route['route'])) {
 				if ($this->execute($route)) {
 					$this->redirect($route);
@@ -112,13 +113,47 @@ class PermitComponent extends Object {
 		}
 		$this->controller->redirect($route['redirect']);
 	}
+	
+	function initializeSessionComponent(&$self) {
+		if ($self->session != null) return $self;
 
+		App::import('Component', 'Session');
+		$componentClass = 'SessionComponent';
+		$self->session =& new $componentClass(null);
+
+		if (method_exists($self->session, 'initialize')) {
+			$self->session->initialize($self->controller);
+		}
+
+		if (method_exists($self->session, 'startup')) {
+			$self->session->startup($self->controller);
+		}
+
+		return $self;
+	}
+
+	/**
+	* Gets a reference to the PermitComponent object instance
+	*
+	* @return PermitComponent Instance of the PermitComponent.
+	* @access public
+	* @static
+	*/
+	function &getInstance() {
+		static $instance = array();
+
+		if (!$instance) {
+			$instance[0] =& new PermitComponent();
+		}
+		return $instance[0];
+	}
 }
 
 class Permit extends Object{
 
 	var $redirect = '/';
 	var $clearances = array();
+	var $settings = array();
 
 	function access($route, $rules = array(), $redirect = array()) {
 		$self =& Permit::getInstance();
@@ -144,6 +179,14 @@ class Permit extends Object{
 		$self->clearances[] = $newRoute;
 
 		return $self->clearances;
+	}
+	
+	function settings($settings = array()) {
+		$self =& Permit::getInstance();
+		if (is_array($settings)) {
+			$self->settings = array_merge($self->settings, $settings);
+		}
+		return $self->settings; 
 	}
 
 /**

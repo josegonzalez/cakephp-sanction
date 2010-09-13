@@ -42,6 +42,10 @@ var $components = array(
 		),
 	'Sanction.Permit' => array('path' => 'MemberAuth')
 	);
+
+// NOTE: you can also configure the settings in the permit.php file (below) in which case, just include the component by itself (this way the configuration is available to the debug_kit panel)
+var $components = array('Sanction.Permit');
+
 ?>
 </code></pre>
 
@@ -50,7 +54,8 @@ Then you will want to setup some permissions...
 Create a file called @permit.php@ in your @app/config/@ folder. You'll need to do the following:
 
 # Add @App::import('Component', 'PermitComponent');@
-# Define some rules (these will be outlined below)
+# Define some rules (these will be outlined below) - Permit::access();
+# Optionally set your path/check settings (below) - Permit::settings();
 
 You can test those rules by browsing to the url you are protecting.
 
@@ -107,6 +112,9 @@ An example @app/config/permit.php@:
 
 <pre><code><?php
 App::import('Component', 'PermitComponent');
+
+// optionally set your path/check here - these settings are avialable in the debug_kit panel
+Permit::settings(array('path' => 'Auth', 'check' => 'User.id'));
 
 // no associated model, example: looks for $sessionUser['group'] == 'admin'
 Permit::access(
