@@ -84,21 +84,21 @@ class PermitComponent extends Object {
 		}
 
 		$count = count($route['rules']['auth']);
-		if ($count == 0) { return false; }
+		if ($count == 0) return false;
 		if (($this->user = $self->session->read("{$self->settings['path']}")) == false) {
 			return true;
 		}
 		foreach ($route['rules']['auth'] as $field => $value) {
-			if (!is_array($value)) { $value = (array) $value; }
-			if (strpos($field,'.')!==false) { $field = '/'.str_replace('.','/',$field); }
-			if ($field[0]=="/") {
+			if (!is_array($value)) $value = (array) $value;
+			if (strpos($field,'.')!==false) $field = '/'.str_replace('.','/',$field);
+			if ($field[0] == "/") {
 				$values = (array) set::extract($field,$this->user);
 				foreach ($value as $condition) {
-					if (in_array($condition,$values)) { $count--; }
+					if (in_array($condition, $values)) $count--;
 				}
 			} else {
 				foreach ($value as $condition) {
-					if ($this->user[$field] == $condition) { $count--; }
+					if ($this->user[$field] == $condition) $count--;
 				}
 			}
 		}
