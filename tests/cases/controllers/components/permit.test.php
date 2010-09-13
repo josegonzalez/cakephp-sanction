@@ -337,7 +337,7 @@ class PermitTest extends CakeTestCase {
 		$this->assertFalse($this->Controller->Permit->parse($testRoute));
 	}
 
-	function testDeny() {
+	function testDenyAccess() {
 		$this->Controller->Permit->settings['path'] = 'MockAuthTest.User';
 		$this->Controller->Permit->settings['check'] = 'id';
 
