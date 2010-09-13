@@ -1,6 +1,7 @@
 <?php
 class PermitComponent extends Object {
 
+	var $components = array('Session');
 	var $controller = null;
 	var $session = null;
 	var $executed = null;
@@ -20,19 +21,19 @@ class PermitComponent extends Object {
 	var $routes = array();
 
 	function initialize(&$controller, $config = array()) {
-		$self =& PermitComponent::getInstance();
+		$permit =& Permit::getInstance();
 		if (!include(CONFIGS . DS . 'permit.php')) {
 			trigger_error("File containing permissions not found.  It should be located at " . APP_PATH . DS . 'config' . DS . "permit.php", E_USER_ERROR);
 		}
 
-		$self->controller = $controller;
+		$this->controller = $controller;
 
-		$self->settings = array_merge($self->settings, $config);
+		$this->settings = array_merge($this->settings, $config);
 
-		foreach ($self->routes as $route) {
-			if (PermitComponent::parse($route['route'])) {
-				if (PermitComponent::execute($route)) {
-					$self->redirect($route);
+		foreach ($permit->routes as $route) {
+			if ($this->parse($route['route'])) {
+				if ($this->execute($route)) {
+					$this->redirect($route);
 				}
 				break;
 			}
@@ -40,15 +41,14 @@ class PermitComponent extends Object {
 	}
 
 	function parse(&$route) {
-		$self =& PermitComponent::getInstance();
 		$count = count($route);
 		if ($count == 0) return false;
 
 		foreach ($route as $key => $value) {
-			if (isset($self->controller->params[$key])) {
+			if (isset($this->controller->params[$key])) {
 				$values = (is_array($value)) ?  $value : array($value);
 				foreach ($values as $k => $v) {
-					if (strtolower($self->controller->params[$key]) == strtolower($v)) {
+					if (strtolower($this->controller->params[$key]) == strtolower($v)) {
 						$count--;
 					}
 				}
@@ -58,9 +58,7 @@ class PermitComponent extends Object {
 	}
 
 	function execute($route) {
-		$self =& PermitComponent::getInstance();
-		$self->executed = $route;
-		$self = $self->initializeSessionComponent($self);
+		$this->executed = $route;
 
 		if (empty($route['rules'])) return false;
 
@@ -72,7 +70,7 @@ class PermitComponent extends Object {
 		if (!isset($route['rules']['auth'])) return false;
 
 		if (is_bool($route['rules']['auth'])) {
-			$is_authed = $self->session->read("{$self->settings['path']}.{$self->settings['check']}");
+			$is_authed = $this->Session->read("{$this->settings['path']}.{$this->settings['check']}");
 
 			if ($route['rules']['auth'] == true && !$is_authed) {
 				return true;
@@ -85,7 +83,7 @@ class PermitComponent extends Object {
 
 		$count = count($route['rules']['auth']);
 		if ($count == 0) return false;
-		if (($this->user = $self->session->read("{$self->settings['path']}")) == false) {
+		if (($this->user = $this->Session->read("{$this->settings['path']}")) == false) {
 			return true;
 		}
 		foreach ($route['rules']['auth'] as $field => $value) {
@@ -106,49 +104,13 @@ class PermitComponent extends Object {
 	}
 
 	function redirect($route) {
-		$self =& PermitComponent::getInstance();
-
 		if ($route['message'] != null) {
 			$message = $route['message'];
 			$element = $route['element'];
 			$params = $route['params'];
-			$self->session->write("Message.{$route['key']}", compact('message', 'element', 'params'));
+			$this->Session->write("Message.{$route['key']}", compact('message', 'element', 'params'));
 		}
-		$self->controller->redirect($route['redirect']);
-	}
-
-	function initializeSessionComponent(&$self) {
-		if ($self->session != null) return $self;
-
-		App::import('Component', 'Session');
-		$componentClass = 'SessionComponent';
-		$self->session =& new $componentClass(null);
-
-		if (method_exists($self->session, 'initialize')) {
-			$self->session->initialize($self->controller);
-		}
-
-		if (method_exists($self->session, 'startup')) {
-			$self->session->startup($self->controller);
-		}
-
-		return $self;
-	}
-
-/**
- * Gets a reference to the PermitComponent object instance
- *
- * @return PermitComponent Instance of the PermitComponent.
- * @access public
- * @static
- */
-	function &getInstance() {
-		static $instance = array();
-
-		if (!$instance) {
-			$instance[0] =& new PermitComponent();
-		}
-		return $instance[0];
+		$this->controller->redirect($route['redirect']);
 	}
 
 }
@@ -159,9 +121,8 @@ class Permit extends Object{
 	var $clearances = array();
 
 	function access($route, $rules = array(), $redirect = array()) {
-		$permitComponent =& PermitComponent::getInstance();
 		$self =& Permit::getInstance();
-		if (empty($rules)) return $permitComponent->routes;
+		if (empty($rules)) return $self->clearances;
 
 		$redirect = array_merge(array('redirect' => $self->redirect,
 									'message' => __('Access denied', true),
@@ -182,10 +143,9 @@ class Permit extends Object{
 			'trace' => $redirect['trace']
 		);
 
-		$permitComponent->routes[] = $newRoute;
 		$self->clearances[] = $newRoute;
 
-		return $permitComponent->routes;
+		return $self->clearances;
 	}
 
 /**

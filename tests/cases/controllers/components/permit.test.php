@@ -84,7 +84,12 @@ class PermitTestController extends Controller {
  * @var array
  * @access public
  */
-	var $components = array('Sanction.Permit' => array('path' => 'MockAuthTest'), 'Session');
+	var $components = array(
+		'Sanction.Permit' => array(
+			'path' => 'MockAuthTest'
+		),
+		'Session'
+	);
 
 /**
  * testUrl property
@@ -102,7 +107,14 @@ class PermitTestController extends Controller {
  */
 	function __construct() {
 		$this->params = Router::parse('/auth_test');
-		Router::setRequestInfo(array($this->params, array('base' => null, 'here' => '/auth_test', 'webroot' => '/', 'passedArgs' => array(), 'argSeparator' => ':', 'namedArgs' => array())));
+		Router::setRequestInfo(array($this->params, array(
+			'base' => null,
+			'here' => '/auth_test',
+			'webroot' => '/',
+			'passedArgs' => array(),
+			'argSeparator' => ':',
+			'namedArgs' => array())
+		));
 		parent::__construct();
 	}
 
@@ -228,8 +240,8 @@ class PermitTest extends CakeTestCase {
 
 		$this->Controller->constructClasses();
 		$this->Controller->params = array(
-			'pass' => array(),  'named' => array(), 
-			'plugin' => '', 'controller' => 'posts', 
+			'pass' => array(),  'named' => array(),
+			'plugin' => '', 'controller' => 'posts',
 			'action' => 'index'
 		);
 		$this->Controller->Component->initialize($this->Controller);
@@ -237,7 +249,6 @@ class PermitTest extends CakeTestCase {
 		$this->Controller->Component->startup($this->Controller);
 
 		set_error_handler('simpleTestErrorHandler');
-		//$this->Controller->Permit->startup($this->Controller);
 		ClassRegistry::addObject('view', new View($this->Controller));
 
 		$this->Controller->Session->delete('Auth');
@@ -265,7 +276,8 @@ class PermitTest extends CakeTestCase {
 					'description' => 'HABTM association',
 					),
 				),
-			));
+			)
+		);
 
 		Router::reload();
 
@@ -315,8 +327,8 @@ class PermitTest extends CakeTestCase {
 		$testRoute = array('controller' => array('posts', 'users'), 'action' => array('index', 'add'));
 		$this->assertTrue($this->Controller->Permit->parse($testRoute));
 
-		$testRoute = array('plugin' => array(null, 'blog'), 
-			'controller' => array('posts', 'users'), 
+		$testRoute = array('plugin' => array(null, 'blog'),
+			'controller' => array('posts', 'users'),
 			'action' => array('index', 'add')
 		);
 		$this->assertTrue($this->Controller->Permit->parse($testRoute));
@@ -324,25 +336,55 @@ class PermitTest extends CakeTestCase {
 		$testRoute = array('controller' => 'posts', 'action' => array('add', 'edit', 'delete'));
 		$this->assertFalse($this->Controller->Permit->parse($testRoute));
 	}
-	
-	/**
-	* Setup a simple, single dim path/check
-	* but will not be able to check on associated data
-	*/
-	function testExceuteAsSubpathUser() {
-		$self =& PermitComponent::getInstance();
-		$self->settings['path'] = 'MockAuthTest.User';
-		$self->settings['check'] = 'id';
+
+	function testDeny() {
+		$this->Controller->Permit->settings['path'] = 'MockAuthTest.User';
+		$this->Controller->Permit->settings['check'] = 'id';
+
+		$testRoute = array('rules' => array('deny' => true));
+		$this->assertTrue($this->Controller->Permit->execute($testRoute));
+
+		$testRoute = array('rules' => array('deny' => false));
+		$this->assertFalse($this->Controller->Permit->execute($testRoute));
+	}
+
+	function testAuthenticatedUser() {
+		$this->Controller->Permit->settings['path'] = 'MockAuthTest.Member';
+		$this->Controller->Permit->settings['check'] = 'id';
+
+		$testRoute = array('rules' => array('auth' => true));
+		$this->assertTrue($this->Controller->Permit->execute($testRoute));
+
+		$this->Controller->Permit->settings['path'] = 'MockAuthTest.User';
+		$testRoute = array('rules' => array('auth' => false));
+		$this->assertTrue($this->Controller->Permit->execute($testRoute));
+	}
+
+	function testNoUser() {
+		$this->Controller->Permit->settings['path'] = 'MockAuthTest.Member';
+		$this->Controller->Permit->settings['check'] = 'id';
+
+		$testRoute = array('rules' => array('auth' => array('group' => 'member')));
+		$this->assertTrue($this->Controller->Permit->execute($testRoute));
+	}
+
+/**
+ * Setup a simple, single dim path/check
+ * but will not be able to check on associated data
+ */
+	function testAuthSingleDimensionExecute() {
+		$this->Controller->Permit->settings['path'] = 'MockAuthTest.User';
+		$this->Controller->Permit->settings['check'] = 'id';
 		# test bool, is logged in
 		$testRoute = array('rules' => array('auth' => true));
 		$this->assertFalse($this->Controller->Permit->execute($testRoute));
-		
+
 		# test single field matches (false response = authorized)
 		$testRoute = array('rules' => array('auth' => array('group' => 'member')));
 		$this->assertFalse($this->Controller->Permit->execute($testRoute));
 		$testRoute = array('rules' => array('auth' => array('group' => 'nonmember')));
 		$this->assertTrue($this->Controller->Permit->execute($testRoute));
-		
+
 		$testRoute = array('rules' => array('auth' => array('id' => 'user-logged-in')));
 		$this->assertFalse($this->Controller->Permit->execute($testRoute));
 		$testRoute = array('rules' => array('auth' => array('id' => 'user-alt')));
@@ -352,24 +394,24 @@ class PermitTest extends CakeTestCase {
 		$testRoute = array('rules' => array('auth' => array('id' => '%user%')));
 		$this->assertTrue($this->Controller->Permit->execute($testRoute));
 	}
-	/**
-	* Setup a full, milti dim path/check
-	* WILL be able to check on associated data
-	*/
-	function testExceuteAsUser() {
-		$self =& PermitComponent::getInstance();
-		$self->settings['path'] = 'MockAuthTest';
-		$self->settings['check'] = 'User.id';
+
+/**
+ * Setup a full, milti dim path/check
+ * WILL be able to check on associated data
+ */
+	function testAuthMultidimensionalExecute() {
+		$this->Controller->Permit->settings['path'] = 'MockAuthTest';
+		$this->Controller->Permit->settings['check'] = 'User.id';
 		# test bool, is logged in
 		$testRoute = array('rules' => array('auth' => true));
 		$this->assertFalse($this->Controller->Permit->execute($testRoute));
-		
+
 		# test single field matches (false response = authorized)
 		$testRoute = array('rules' => array('auth' => array('/User/group' => 'member')));
 		$this->assertFalse($this->Controller->Permit->execute($testRoute));
 		$testRoute = array('rules' => array('auth' => array('/User/group' => 'nonmember')));
 		$this->assertTrue($this->Controller->Permit->execute($testRoute));
-		
+
 		$testRoute = array('rules' => array('auth' => array('/User/id' => 'user-logged-in')));
 		$this->assertFalse($this->Controller->Permit->execute($testRoute));
 		$testRoute = array('rules' => array('auth' => array('/User/id' => 'user-alt')));
@@ -378,12 +420,12 @@ class PermitTest extends CakeTestCase {
 		$this->assertTrue($this->Controller->Permit->execute($testRoute));
 		$testRoute = array('rules' => array('auth' => array('/User/id' => '%user%')));
 		$this->assertTrue($this->Controller->Permit->execute($testRoute));
-		
+
 		$testRoute = array('rules' => array('auth' => array('/Role/name' => 'singleAssociation')));
 		$this->assertFalse($this->Controller->Permit->execute($testRoute));
 		$testRoute = array('rules' => array('auth' => array('/Role/name' => 'something-else')));
 		$this->assertTrue($this->Controller->Permit->execute($testRoute));
-		
+
 		$testRoute = array('rules' => array('auth' => array('/Group/name' => 'admin')));
 		$this->assertFalse($this->Controller->Permit->execute($testRoute));
 		$testRoute = array('rules' => array('auth' => array('/Group/name' => 'editors')));
@@ -392,7 +434,6 @@ class PermitTest extends CakeTestCase {
 		$this->assertFalse($this->Controller->Permit->execute($testRoute));
 		$testRoute = array('rules' => array('auth' => array('/Group/name' => 'something-else')));
 		$this->assertTrue($this->Controller->Permit->execute($testRoute));
-		
 	}
 }
 ?>
