@@ -96,7 +96,7 @@ class PermitComponent extends Object {
 				}
 			} else {
 				foreach ($value as $condition) {
-					if ($this->user[$field] == $condition) $count--;
+					if (isset($this->user[$field]) && $this->user[$field] == $condition) $count--;
 				}
 			}
 		}
