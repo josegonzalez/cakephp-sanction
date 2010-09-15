@@ -4,9 +4,9 @@ echo '<h4>' . __d('sanction', 'Executed Rule', true) . '</h4>';
 echo $toolbar->makeNeatArray(array('rule' => $content['executed']));
 
 echo '<h4>' . __d('sanction', 'Access Rules', true) . '</h4>';
-echo $toolbar->makeNeatArray($content['clearances']);
+echo $toolbar->makeNeatArray($content['routes']);
 
-echo '<h4>' . __d('sanction', 'User Identified', true) . '</h4>';
+echo '<h4>' . __d('sanction', 'Identified User', true) . '</h4>';
 echo $toolbar->makeNeatArray($content['user']);
 
 ?>

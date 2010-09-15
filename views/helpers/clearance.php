@@ -93,11 +93,10 @@ class ClearanceHelper extends AppHelper {
 		if (!isset($url['action']) && empty($url['action'])) $url['action'] = $this->params['action'];
 
 		if (empty($this->routes)) {
-			$permit =& Permit::getInstance();
-
-			// $permit->clearances should contain an array of all clearances now
-			$this->routes = $permit->clearances;
+			$Permit =& PermitComponent::getInstance();
+			$this->routes = $Permit->routes;
 		}
+
 		if (empty($this->routes)) return $this->Html->link($title, $url, $options, $confirmMessage);
 
 		foreach ($this->routes as $route) {

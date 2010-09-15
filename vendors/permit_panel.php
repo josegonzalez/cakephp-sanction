@@ -5,16 +5,14 @@ class PermitPanel extends DebugPanel {
 	var $title = 'Permit';
 
 	function beforeRender(&$controller) {
-		$permit_component =& PermitComponent::getInstance();
-		$permit =& Permit::getInstance();
-		if (empty($permit_component->user)) {
-			$permit_component = $permit_component->initializeSessionComponent($permit_component);
-			$permit_component->user = $permit_component->session->read("{$permit_component->settings['path']}");
+		$Permit =& PermitComponent::getInstance();
+		if (empty($Permit->_user)) {
+			$Permit->_user = $Permit->Session->read("{$Permit->settings['path']}");
 		}
 		return array(
-			'user' => $permit_component->user,
-			'clearances' => $permit->clearances,
-			'executed' => $permit_component->executed
+			'user' => $Permit->_user,
+			'routes' => $Permit->routes,
+			'executed' => $Permit->executed
 		);
 	}
 }
