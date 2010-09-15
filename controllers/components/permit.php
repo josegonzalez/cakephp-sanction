@@ -1,12 +1,20 @@
 <?php
 class PermitComponent extends Object {
 
+/**
+ * Other components utilized by PermitComponent
+ *
+ * @var array
+ * @access public
+ */
 	var $components = array('Session');
-	var $controller = null;
-	var $session = null;
-	var $executed = null;
-	var $user = null;
 
+/**
+ * Parameter data from Controller::$params
+ *
+ * @var array
+ * @access public
+ */
 	var $settings = array(
 		'path' => 'Auth.User',
 		'check' => 'id'
@@ -20,35 +28,52 @@ class PermitComponent extends Object {
  */
 	var $routes = array();
 
+/**
+ * Array containing executed route
+ *
+ * @var array
+ * @access public
+ */
+	var $executed = null;
+
+/**
+ * Maintains current logged in user.
+ *
+ * @var boolean
+ * @access private
+ */
+	var $_user = null;
+
 	function initialize(&$controller, $config = array()) {
-		$permit =& Permit::getInstance();
-		if (!include(CONFIGS . DS . 'permit.php')) {
+		if (!include(CONFIGS . 'permit.php')) {
 			trigger_error("File containing permissions not found.  It should be located at " . APP_PATH . DS . 'config' . DS . "permit.php", E_USER_ERROR);
 		}
 
-		$this->controller = $controller;
+		$this->settings = array_merge($this->settings, $config);
+		$Permit =& PermitComponent::getInstance();
+		$this->routes = $Permit->routes;
+	}
 
-		$this->settings = array_merge($this->settings, $permit->settings, $config);
-
-		foreach ($permit->clearances as $route) {
-			if ($this->parse($route['route'])) {
+	function startup(&$controller) {
+		foreach ($this->routes as $route) {
+			if ($this->parse($controller, $route['route'])) {
 				if ($this->execute($route)) {
-					$this->redirect($route);
+					$this->redirect($controller, $route);
 				}
 				break;
 			}
 		}
 	}
 
-	function parse(&$route) {
+	function parse(&$controller, $route) {
 		$count = count($route);
 		if ($count == 0) return false;
 
 		foreach ($route as $key => $value) {
-			if (isset($this->controller->params[$key])) {
+			if (isset($controller->params[$key])) {
 				$values = (is_array($value)) ?  $value : array($value);
 				foreach ($values as $k => $v) {
-					if (strtolower($this->controller->params[$key]) == strtolower($v)) {
+					if (strtolower($controller->params[$key]) == strtolower($v)) {
 						$count--;
 					}
 				}
@@ -83,69 +108,49 @@ class PermitComponent extends Object {
 
 		$count = count($route['rules']['auth']);
 		if ($count == 0) return false;
-		if (($this->user = $this->Session->read("{$this->settings['path']}")) == false) {
+		if (($this->_user = $this->Session->read("{$this->settings['path']}")) == false) {
 			return true;
 		}
 		foreach ($route['rules']['auth'] as $field => $value) {
 			if (!is_array($value)) $value = (array) $value;
 			if (strpos($field,'.')!==false) $field = '/'.str_replace('.','/',$field);
 			if ($field[0] == "/") {
-				$values = (array) set::extract($field,$this->user);
+				$values = (array) set::extract($field, $this->_user);
 				foreach ($value as $condition) {
 					if (in_array($condition, $values)) $count--;
 				}
 			} else {
 				foreach ($value as $condition) {
-					if (isset($this->user[$field]) && $this->user[$field] == $condition) $count--;
+					if (isset($this->_user[$field]) && $this->_user[$field] == $condition) $count--;
 				}
 			}
 		}
 		if ($count != 0) return true;
 	}
 
-	function redirect($route) {
+	function redirect(&$controller, $route) {
 		if ($route['message'] != null) {
 			$message = $route['message'];
 			$element = $route['element'];
 			$params = $route['params'];
 			$this->Session->write("Message.{$route['key']}", compact('message', 'element', 'params'));
 		}
-		$this->controller->redirect($route['redirect']);
+
+		$controller->redirect($route['redirect']);
 	}
 
-	/**
-	* Gets a reference to the PermitComponent object instance
-	*
-	* @return PermitComponent Instance of the PermitComponent.
-	* @access public
-	* @static
-	*/
-	function &getInstance() {
-		static $instance = array();
+    function access($route, $rules = array(), $redirect = array()) {
+        if (empty($rules)) return $this->routes;
 
-		if (!$instance) {
-			$instance[0] =& new PermitComponent();
-		}
-		return $instance[0];
-	}
-}
-
-class Permit extends Object{
-
-	var $redirect = '/';
-	var $clearances = array();
-	var $settings = array();
-
-	function access($route, $rules = array(), $redirect = array()) {
-		$self =& Permit::getInstance();
-		if (empty($rules)) return $self->clearances;
-
-		$redirect = array_merge(array('redirect' => $self->redirect,
-									'message' => __('Access denied', true),
-									'element' => 'default',
-									'params' => array(),
-									'key' => 'flash'),
-									$redirect);
+		$redirect = array_merge(array(
+				'redirect' => '/',
+				'message' => __('Access denied', true),
+				'element' => 'default',
+				'params' => array(),
+				'key' => 'flash'
+			),
+			$redirect
+		);
 
 		$newRoute = array(
 			'route' => $route,
@@ -157,31 +162,49 @@ class Permit extends Object{
 			'key' => $redirect['key'],
 		);
 
-		$self->clearances[] = $newRoute;
-
-		return $self->clearances;
-	}
-	
-	function settings($settings = array()) {
-		$self =& Permit::getInstance();
-		if (is_array($settings)) {
-			$self->settings = array_merge($self->settings, $settings);
-		}
-		return $self->settings; 
-	}
+		$this->routes[] = $newRoute;
+		return $this->routes;
+    }
 
 /**
- * Gets a reference to the Permit object instance
+ * Gets a reference to the PermitComponent object instance
  *
- * @return Permit Instance of the Permit.
+ * @return PermitComponent Instance of the PermitComponent.
  * @access public
  * @static
  */
 	function &getInstance() {
 		static $instance = array();
 
-		if (!$instance) $instance[0] =& new Permit();
+		if (!$instance) {
+			$instance[0] =& new PermitComponent();
+		}
 		return $instance[0];
 	}
+
 }
-?>
+
+class Permit extends Object{
+
+	function access($route, $rules = array(), $redirect = array()) {
+		$Permit =& PermitComponent::getInstance();
+		return $Permit->access($route, $rules, $redirect);
+	}
+
+/**
+ * Gets a reference to the Permit object instance
+ *
+ * @return object Instance of the Permit.
+ * @access public
+ * @static
+ */
+	function &getInstance() {
+		static $instance = array();
+
+		if (!$instance) {
+			$instance[0] =& new Permit();
+		}
+		return $instance[0];
+	}
+
+}
