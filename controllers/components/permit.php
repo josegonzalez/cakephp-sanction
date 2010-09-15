@@ -27,10 +27,9 @@ class PermitComponent extends Object {
 		}
 
 		$this->controller = $controller;
-		
-		$this->settings = array_merge($this->settings, $permit->settings);
-		$this->settings = array_merge($this->settings, $config);
-		
+
+		$this->settings = array_merge($this->settings, $permit->settings, $config);
+
 		foreach ($permit->clearances as $route) {
 			if ($this->parse($route['route'])) {
 				if ($this->execute($route)) {
