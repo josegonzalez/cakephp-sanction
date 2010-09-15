@@ -112,24 +112,6 @@ class PermitComponent extends Object {
 		}
 		$this->controller->redirect($route['redirect']);
 	}
-	
-	function initializeSessionComponent(&$self) {
-		if ($self->session != null) return $self;
-
-		App::import('Component', 'Session');
-		$componentClass = 'SessionComponent';
-		$self->session =& new $componentClass(null);
-
-		if (method_exists($self->session, 'initialize')) {
-			$self->session->initialize($self->controller);
-		}
-
-		if (method_exists($self->session, 'startup')) {
-			$self->session->startup($self->controller);
-		}
-
-		return $self;
-	}
 
 	/**
 	* Gets a reference to the PermitComponent object instance
