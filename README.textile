@@ -55,7 +55,6 @@ Create a file called @permit.php@ in your @app/config/@ folder. You'll need to d
 
 # Add @App::import('Component', 'PermitComponent');@
 # Define some rules (these will be outlined below) - Permit::access();
-# Optionally set your path/check settings (below) - Permit::settings();
 
 You can test those rules by browsing to the url you are protecting.
 
@@ -112,9 +111,6 @@ An example @app/config/permit.php@:
 
 <pre><code><?php
 App::import('Component', 'PermitComponent');
-
-// optionally set your path/check here - these settings are avialable in the debug_kit panel
-Permit::settings(array('path' => 'Auth', 'check' => 'User.id'));
 
 // no associated model, example: looks for $sessionUser['group'] == 'admin'
 Permit::access(
