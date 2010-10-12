@@ -70,8 +70,8 @@ class PermitComponent extends Object {
 		if ($count == 0) return false;
 		foreach ($route as $key => $value) {
 			if (isset($controller->params[$key])) {
-				$values = (is_array($value)) ?  $value : array($value);
-				$check = (is_array($controller->params[$key])) ?  $controller->params[$key] : array($controller->params[$key]);
+				$values = (array) $value;
+				$check = (array) $controller->params[$key];
 				foreach ($check as $k => $_check) {
 					$check[$k] = strtolower($_check);
 				}
