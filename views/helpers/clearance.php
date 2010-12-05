@@ -49,7 +49,8 @@ class ClearanceHelper extends AppHelper {
  * @access public
  */
 	var $settings = array(
-		'path' => 'Auth.User'
+		'path'  => 'Auth.User',
+		'check' => 'id',
 	);
 
 /**
@@ -60,7 +61,7 @@ class ClearanceHelper extends AppHelper {
  * @author Jose Diaz-Gonzalez
  **/
 	function __construct($config) {
-		$this->settings = array_merge($config, $this->settings);
+		$this->settings = array_merge($this->settings, $config);
 	}
 
 /**
@@ -161,7 +162,7 @@ class ClearanceHelper extends AppHelper {
 		if (!isset($route['rules']['auth'])) return $this->Html->link($title, $url, $options, $confirmMessage);
 
 		if (is_bool($route['rules']['auth'])) {
-			$is_authed = $this->Session->read("{$this->settings['path']}.group");
+			$is_authed = $this->Session->read("{$this->settings['path']}.{$this->settings['check']}");
 
 			if ($route['rules']['auth'] == true && !$is_authed) {
 				return;
