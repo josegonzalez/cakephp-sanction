@@ -7,7 +7,7 @@ class PermitPanel extends DebugPanel {
 	function beforeRender(&$controller) {
 		$Permit =& PermitComponent::getInstance();
 		if (empty($Permit->_user)) {
-			$Permit->_user = $Permit->Session->read("{$Permit->settings['path']}");
+			$Permit->_user = $controller->Toolbar->Session->read("{$Permit->settings['path']}");
 		}
 		return array(
 			'user' => $Permit->_user,

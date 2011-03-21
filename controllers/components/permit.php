@@ -86,7 +86,8 @@ class PermitComponent extends Object {
 	}
 
 	function execute($route) {
-		$this->executed = $route;
+		$Permit =& PermitComponent::getInstance();
+		$Permit->executed = $this->executed = $route;
 
 		if (empty($route['rules'])) return false;
 
