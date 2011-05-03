@@ -58,6 +58,7 @@ class PermitComponent extends Object {
 		foreach ($this->routes as $route) {
 			if ($this->parse($controller, $route['route'])) {
 				if ($this->execute($route)) {
+					$this->Session->write('Sanction.redirect', $controller->here);
 					$this->redirect($controller, $route);
 				}
 				break;
