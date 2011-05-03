@@ -58,6 +58,7 @@ class PermitComponent extends Object {
 		foreach ($this->routes as $route) {
 			if ($this->parse($controller, $route['route'])) {
 				if ($this->execute($route)) {
+					$this->Session->write('Sanction.referer', $controller->here);
 					$this->redirect($controller, $route);
 				}
 				break;
@@ -193,6 +194,22 @@ class Permit extends Object{
 	function access($route, $rules = array(), $redirect = array()) {
 		$Permit =& PermitComponent::getInstance();
 		return $Permit->access($route, $rules, $redirect);
+	}
+
+/**
+ * Returns the referring URL for this request.
+ *
+ * @param string $default Default URL to use if Session cannot be read
+ * @return string Referring URL
+ * @access public
+ */
+	function referer($default = null) {
+		if(is_null($default)) return false;
+		if($this->Session->check('Sanction.referer')) {
+            $default = $this->Session->read('Sanction.referer');
+            $this->Session->delete('Sanction.referer');
+        }
+		return Router::normalize($default);
 	}
 
 /**
