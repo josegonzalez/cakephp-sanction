@@ -195,6 +195,21 @@ class Permit extends Object{
 		$Permit =& PermitComponent::getInstance();
 		return $Permit->access($route, $rules, $redirect);
 	}
+/**
+ * Returns the referring URL for this request.
+ *
+ * @param string $default Default URL to use if Session cannot be read
+ * @return string Referring URL
+ * @access public
+ */
+	function referer($default = null) {
+		if(is_null($default)) $default = '/';
+		if($this->Session->check('Sanction.redirect')) {
+            $default = $this->Session->read('Sanction.redirect');
+            $this->Session->delete('Sanction.redirect');
+        }
+		return Router::normalize($default);
+	}
 
 /**
  * Gets a reference to the Permit object instance
