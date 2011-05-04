@@ -58,7 +58,17 @@ class PermitComponent extends Object {
 		foreach ($this->routes as $route) {
 			if ($this->parse($controller, $route['route'])) {
 				if ($this->execute($route)) {
-					$this->Session->write('Sanction.referer', $controller->here);
+					if (isset($controller->params['url']['url'])) {
+						$url = $controller->params['url']['url'];
+					}
+
+					$url = Router::normalize($url);
+					if (!empty($controller->params['url']) && count($controller->params['url']) >= 2) {
+						$query = $controller->params['url'];
+						unset($query['url'], $query['ext']);
+						$url .= Router::queryString($query, array());
+					}
+					$this->Session->write('Sanction.referer', $url);
 					$this->redirect($controller, $route);
 				}
 				break;
@@ -144,8 +154,8 @@ class PermitComponent extends Object {
 		$controller->redirect($route['redirect']);
 	}
 
-    function access($route, $rules = array(), $redirect = array()) {
-        if (empty($rules)) return $this->routes;
+	function access($route, $rules = array(), $redirect = array()) {
+		if (empty($rules)) return $this->routes;
 
 		$redirect = array_merge(array(
 				'redirect' => '/',
@@ -169,7 +179,27 @@ class PermitComponent extends Object {
 
 		$this->routes[] = $newRoute;
 		return $this->routes;
-    }
+	}
+
+/**
+ * Returns the referring URL for this request.
+ *
+ * @param mixed $default Default URL to use if Session cannot be read
+ * @return string Referring URL
+ * @access public
+ */
+	function referer($referer = null) {
+		if ($this->Session->check('Sanction.referer')) {
+			$referer = $this->Session->read('Sanction.referer');
+			$this->Session->delete('Sanction.referer');
+		}
+
+		if ($referer === null) {
+			return false;
+		}
+
+		return Router::normalize($referer);
+	}
 
 /**
  * Gets a reference to the PermitComponent object instance
@@ -194,22 +224,6 @@ class Permit extends Object{
 	function access($route, $rules = array(), $redirect = array()) {
 		$Permit =& PermitComponent::getInstance();
 		return $Permit->access($route, $rules, $redirect);
-	}
-
-/**
- * Returns the referring URL for this request.
- *
- * @param string $default Default URL to use if Session cannot be read
- * @return string Referring URL
- * @access public
- */
-	function referer($default = null) {
-		if(is_null($default)) return false;
-		if($this->Session->check('Sanction.referer')) {
-            $default = $this->Session->read('Sanction.referer');
-            $this->Session->delete('Sanction.referer');
-        }
-		return Router::normalize($default);
 	}
 
 /**
