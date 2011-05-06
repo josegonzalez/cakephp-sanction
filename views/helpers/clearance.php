@@ -181,8 +181,16 @@ class ClearanceHelper extends AppHelper {
 		}
 
 		foreach ($route['rules']['auth'] as $field => $value) {
-			if ($user[$field] == $value) {
-				$count--;
+			if (strpos($field,'.')!==false) $field = '/'.str_replace('.','/',$field);
+			if ($field[0] == "/") {
+				$values = (array) Set::extract($field, $user);
+				foreach ($value as $condition) {
+					if (in_array($condition, $values)) $count--;
+				}
+			} else {
+				if ($user[$field] == $value) {
+					$count--;
+				}
 			}
 		}
 
