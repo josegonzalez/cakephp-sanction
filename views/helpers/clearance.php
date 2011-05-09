@@ -194,7 +194,7 @@ class ClearanceHelper extends AppHelper {
 			}
 		}
 
-		return ($count != 0) ? null : $this->Html->link($title, $url, $options, $confirmMessage);;
+		return ($count != 0) ? null : $this->Html->link($title, $url, $options, $confirmMessage);
 	}
 
 }
