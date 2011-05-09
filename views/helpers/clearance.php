@@ -61,7 +61,7 @@ class ClearanceHelper extends AppHelper {
  * @author Jose Diaz-Gonzalez
  **/
 	function __construct($config = array()) {
-		$this->settings = array_merge($this->settings, $config);
+		$this->settings = array_merge($this->settings, (array) $config);
 	}
 
 /**
