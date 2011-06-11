@@ -241,6 +241,19 @@ class PermitComponent extends Object {
 			),
 			$redirect
 		);
+		
+		//convert underscored names to camelCase as additional way of accessing a controller
+		if (isset($route['controller'])) {
+			$controllers = array(); 
+	    $func = create_function('$c', 'return strtoupper($c[1]);');
+			foreach ($route['controller'] as $controller) {
+				if (strstr($controller, '_')) {
+					$controllers[] = preg_replace_callback('/_([a-z])/', $func, $controller);					
+				}
+				$controllers[] = $controller; 
+			}
+			$route['controller'] = $controllers;
+		}
 
 		$newRoute = array(
 			'route' => $route,
