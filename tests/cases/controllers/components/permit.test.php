@@ -326,6 +326,9 @@ class PermitTest extends CakeTestCase {
 	}
 
 	function testSingleParse() {
+		$testRoute = array();
+		$this->assertFalse($this->Controller->Permit->_parse($testRoute));
+
 		$testRoute = array('controller' => 'posts');
 		$this->assertTrue($this->Controller->Permit->_parse($testRoute));
 
@@ -384,6 +387,11 @@ class PermitTest extends CakeTestCase {
 	function testDenyAccess() {
 		$this->Controller->Permit->settings['path'] = 'MockAuthTest.User';
 		$this->Controller->Permit->settings['check'] = 'id';
+
+		$testRoute = array('rules' => array());
+		$this->assertNull($this->Controller->Permit->executed);
+		$this->assertFalse($this->Controller->Permit->_execute($testRoute));
+		$this->Controller->Permit->executed = null;
 
 		$testRoute = array('rules' => array('deny' => true));
 		$this->assertNull($this->Controller->Permit->executed);
@@ -508,6 +516,19 @@ class PermitTest extends CakeTestCase {
 		$testRoute = array('rules' => array('auth' => array('/Group/name' => 'something-else')));
 		$this->assertTrue($this->Controller->Permit->_execute($testRoute));
 		$this->assertEqual($this->Controller->Permit->executed, $testRoute);
+
+		$testRoute = array('rules' => array('auth' => array('Group.name' => 'admin')));
+		$this->assertFalse($this->Controller->Permit->_execute($testRoute));
+		$this->assertEqual($this->Controller->Permit->executed, $testRoute);
+		$testRoute = array('rules' => array('auth' => array('Group.name' => 'editors')));
+		$this->assertFalse($this->Controller->Permit->_execute($testRoute));
+		$this->assertEqual($this->Controller->Permit->executed, $testRoute);
+		$testRoute = array('rules' => array('auth' => array('Group.description' => 'HABTM association')));
+		$this->assertFalse($this->Controller->Permit->_execute($testRoute));
+		$this->assertEqual($this->Controller->Permit->executed, $testRoute);
+		$testRoute = array('rules' => array('auth' => array('Group.name' => 'something-else')));
+		$this->assertTrue($this->Controller->Permit->_execute($testRoute));
+		$this->assertEqual($this->Controller->Permit->executed, $testRoute);
 	}
 
 	function testStartup() {
@@ -625,6 +646,17 @@ class PermitTest extends CakeTestCase {
 		$this->assertEqual($session['flash']['message'], __('Access denied', true));
 		$this->assertEqual($session['flash']['element'], 'error');
 		$this->assertEqual(count($session['flash']['params']), 0);
+	}
+
+	function testReferer() {
+		$this->Controller->Session->write('Sanction.referer', array());
+		$this->assertEqual('/', $this->Controller->Permit->referer());
+
+		$this->Controller->Session->write('Sanction.referer', null);
+		$this->assertFalse($this->Controller->Permit->referer());
+
+		$this->Controller->Session->write('Sanction.referer', array('controller' => 'users', 'action' => 'login'));
+		$this->assertEqual('/users/login', $this->Controller->Permit->referer());
 	}
 
 	function testPermitObject() {
