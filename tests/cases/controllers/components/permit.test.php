@@ -86,7 +86,8 @@ class PermitTestController extends Controller {
  */
 	var $components = array(
 		'Sanction.Permit' => array(
-			'path' => 'MockAuthTest'
+			'path' => 'MockAuthTest',
+			'isTest' => true,
 		),
 		'Session'
 	);
@@ -467,6 +468,7 @@ class PermitTest extends CakeTestCase {
 	}
 
 	function testStartup() {
+		$this->Controller->Permit->settings['isTest'] = false;
 		$this->Controller->Permit->access(
 			array('controller' => 'posts', 'action' => array('add', 'edit', 'delete')),
 			array('auth' => true),
@@ -567,8 +569,9 @@ class PermitTest extends CakeTestCase {
 	}
 
 	function testPermitObject() {
-		$permit = Permit::getInstance();
 		$Permit = PermitComponent::getInstance();
+		$Permit->routes = array();
+		$Permit->executed = null;
 		$this->assertEqual(count($Permit->routes), 0);
 
 		Permit::access(

@@ -25,7 +25,8 @@ class PermitComponent extends Object {
  */
 	var $settings = array(
 		'path' => 'Auth.User',
-		'check' => 'id'
+		'check' => 'id',
+		'isTest' => false,
 	);
 
 /**
@@ -65,6 +66,8 @@ class PermitComponent extends Object {
 		}
 
 		$this->settings = array_merge($this->settings, $config);
+		if ($this->settings['isTest']) return;
+
 		$Permit =& PermitComponent::getInstance();
 		$this->routes = $Permit->routes;
 	}
@@ -79,11 +82,15 @@ class PermitComponent extends Object {
  * @access public
  */
 	function startup(&$controller) {
+		if ($this->settings['isTest']) return;
+
 		foreach ($this->routes as $route) {
 			if ($this->_parse($controller, $route['route'])) {
 				if ($this->_execute($route)) {
 					if (isset($controller->params['url']['url'])) {
 						$url = $controller->params['url']['url'];
+					} else {
+						$url = $controller->params;
 					}
 
 					$url = Router::normalize($url);
@@ -110,11 +117,19 @@ class PermitComponent extends Object {
  */
 	function _parse(&$controller, $route) {
 		$count = count($route);
-		if ($count == 0) return false;
+		if ($count == 0) {
+			return false;
+		}
+
 		foreach ($route as $key => $value) {
 			if (isset($controller->params[$key])) {
 				$values = (array) $value;
 				$check = (array) $controller->params[$key];
+
+				if (!count($values) && in_array(null, $check)) {
+					$count--;
+					continue;
+				}
 
 				foreach ($check as $k => $_check) {
 					$check[$k] = strtolower($_check);
