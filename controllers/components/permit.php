@@ -54,6 +54,13 @@ class PermitComponent extends Object {
 	var $_user = null;
 
 /**
+ * Current request parameters
+ *
+ * @var array
+ */
+	var $_requestParams = array();
+
+/**
  * Initializes SanctionComponent for use in the controller
  *
  * @param object $controller A reference to the instantiating controller object
@@ -70,6 +77,13 @@ class PermitComponent extends Object {
 
 		$Permit =& PermitComponent::getInstance();
 		$this->routes = $Permit->routes;
+
+		$this->_requestParams = $controller->params;
+		foreach (array('controller', 'plugin') as $inflected) {
+			if (isset($this->_requestParams[$inflected])) {
+				$this->_requestParams[$inflected] = strtolower(Inflector::underscore($this->_requestParams[$inflected]));
+			}
+		}
 	}
 
 
@@ -85,17 +99,17 @@ class PermitComponent extends Object {
 		if ($this->settings['isTest']) return;
 
 		foreach ($this->routes as $route) {
-			if ($this->_parse($controller, $route['route'])) {
+			if ($this->_parse($route['route'])) {
 				if ($this->_execute($route)) {
-					if (isset($controller->params['url']['url'])) {
-						$url = $controller->params['url']['url'];
+					if (isset($this->_requestParams['url']['url'])) {
+						$url = $this->_requestParams['url']['url'];
 					} else {
-						$url = $controller->params;
+						$url = $this->_requestParams;
 					}
 
 					$url = Router::normalize($url);
-					if (!empty($controller->params['url']) && count($controller->params['url']) >= 2) {
-						$query = $controller->params['url'];
+					if (!empty($this->_requestParams['url']) && count($this->_requestParams['url']) >= 2) {
+						$query = $this->_requestParams['url'];
 						unset($query['url'], $query['ext']);
 						$url .= Router::queryString($query, array());
 					}
@@ -115,24 +129,30 @@ class PermitComponent extends Object {
  * @return boolean true if current request matches Permit route, false otherwise
  * @access protected
  */
-	function _parse(&$controller, $route) {
+	function _parse($route) {
 		$count = count($route);
 		if ($count == 0) {
 			return false;
 		}
 
 		foreach ($route as $key => $value) {
-			if (isset($controller->params[$key])) {
+			if (isset($this->_requestParams[$key])) {
 				$values = (array) $value;
-				$check = (array) $controller->params[$key];
+				$check = (array) $this->_requestParams[$key];
 
 				if (!count($values) && in_array(null, $check)) {
 					$count--;
 					continue;
 				}
 
-				foreach ($check as $k => $_check) {
-					$check[$k] = strtolower($_check);
+				if (in_array($key, array('controller', 'plugin'))) {
+					foreach ($check as $k => $_check) {
+						$check[$k] = Inflector::underscore(strtolower($_check));
+					}
+				} else {
+					foreach ($check as $k => $_check) {
+						$check[$k] = strtolower($_check);
+					}
 				}
 
 				foreach ($values as $k => $v) {
@@ -256,6 +276,29 @@ class PermitComponent extends Object {
 			),
 			$redirect
 		);
+
+		//convert underscored names to camelCase as additional way of accessing a controller
+		foreach (array('controller', 'plugin') as $inflected) {
+			if (isset($route[$inflected])) {
+				if (is_array($route[$inflected])) {
+					foreach ($route[$inflected] as $i => $controllerName) {
+						$route[$inflected][$i] = Inflector::underscore($controllerName);
+					}
+				} else {
+					$route[$inflected] = Inflector::underscore($route[$inflected]);
+				}
+			}
+		}
+
+		foreach ($route as $k => $value) {
+			if (is_array($value)) {
+				foreach ($value as $i => $_value) {
+					$route[$k][$i] = strtolower($_value);
+				}
+			} else {
+				$route[$k] = strtolower($value);
+			}
+		}
 
 		$newRoute = array(
 			'route' => $route,

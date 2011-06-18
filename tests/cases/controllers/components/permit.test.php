@@ -239,7 +239,7 @@ class PermitTest extends CakeTestCase {
 		restore_error_handler();
 
 		$this->Controller->constructClasses();
-		$this->Controller->params = array(
+		$this->Controller->params = $this->Controller->Permit->_requestParams = array(
 			'pass' => array(),  'named' => array(),
 			'plugin' => '', 'controller' => 'posts',
 			'action' => 'index'
@@ -300,41 +300,85 @@ class PermitTest extends CakeTestCase {
 		unset($this->Controller);
 	}
 
+	function setup() {
+		$Permit = PermitComponent::getInstance();
+		$this->Controller->Permit->_user = $Permit->_user = array();
+		$this->Controller->params = array(
+			'pass' => array(),  'named' => array(),
+			'plugin' => '', 'controller' => 'posts',
+			'action' => 'index'
+		);
+		$this->Controller->Permit->_requestParams = $Permit->_requestParams = array(
+			'pass' => array(),  'named' => array(),
+			'plugin' => '', 'controller' => 'Posts',
+			'action' => 'index'
+		);
+
+		$this->Controller->Permit->routes = $Permit->routes = array();
+		$this->Controller->Permit->executed = $Permit->executed = null;
+		$this->Controller->Permit->settings = $Permit->settings = array(
+			'path' => 'MockAuthTest',
+			'check' => 'id',
+			'isTest' => true,
+		);
+
+		$this->Controller->testUrl = null;
+	}
+
 	function testSingleParse() {
 		$testRoute = array('controller' => 'posts');
-		$this->assertTrue($this->Controller->Permit->_parse($this->Controller, $testRoute));
+		$this->assertTrue($this->Controller->Permit->_parse($testRoute));
 
 		$testRoute = array('controller' => 'posts', 'action' => 'index');
-		$this->assertTrue($this->Controller->Permit->_parse($this->Controller, $testRoute));
+		$this->assertTrue($this->Controller->Permit->_parse($testRoute));
 
 		$testRoute = array('plugin' => null, 'controller' => 'posts', 'action' => 'index');
-		$this->assertTrue($this->Controller->Permit->_parse($this->Controller, $testRoute));
+		$this->assertTrue($this->Controller->Permit->_parse($testRoute));
 
 		$testRoute = array('controller' => 'posts', 'action' => 'add');
-		$this->assertFalse($this->Controller->Permit->_parse($this->Controller, $testRoute));
+		$this->assertFalse($this->Controller->Permit->_parse($testRoute));
 
 		$testRoute = array('controller' => 'users', 'action' => 'index');
-		$this->assertFalse($this->Controller->Permit->_parse($this->Controller, $testRoute));
+		$this->assertFalse($this->Controller->Permit->_parse($testRoute));
 	}
 
 	function testMultipleParse() {
 		$testRoute = array('controller' => 'posts', 'action' => array('index'));
-		$this->assertTrue($this->Controller->Permit->_parse($this->Controller, $testRoute));
+		$this->assertTrue($this->Controller->Permit->_parse($testRoute));
 
 		$testRoute = array('controller' => 'posts', 'action' => array('index', 'add'));
-		$this->assertTrue($this->Controller->Permit->_parse($this->Controller, $testRoute));
+		$this->assertTrue($this->Controller->Permit->_parse($testRoute));
 
 		$testRoute = array('controller' => array('posts', 'users'), 'action' => array('index', 'add'));
-		$this->assertTrue($this->Controller->Permit->_parse($this->Controller, $testRoute));
+		$this->assertTrue($this->Controller->Permit->_parse($testRoute));
 
 		$testRoute = array('plugin' => array(null, 'blog'),
 			'controller' => array('posts', 'users'),
 			'action' => array('index', 'add')
 		);
-		$this->assertTrue($this->Controller->Permit->_parse($this->Controller, $testRoute));
+		$this->assertTrue($this->Controller->Permit->_parse($testRoute));
 
 		$testRoute = array('controller' => 'posts', 'action' => array('add', 'edit', 'delete'));
-		$this->assertFalse($this->Controller->Permit->_parse($this->Controller, $testRoute));
+		$this->assertFalse($this->Controller->Permit->_parse($testRoute));
+	}
+
+	function testCaseAndInflectionParse() {
+		$testRoute = array('controller' => 'POSTS');
+		$this->assertTrue($this->Controller->Permit->_parse($testRoute));
+
+		$this->Controller->params = $this->Controller->Permit->_requestParams = array(
+			'pass' => array(),  'named' => array(),
+			'plugin' => '', 'controller' => 'blog_posts',
+			'action' => 'INDEX'
+		);
+		$testRoute = array('controller' => 'POSTS');
+		$this->assertFalse($this->Controller->Permit->_parse($testRoute));
+
+		$testRoute = array('controller' => 'Blog_POSTS');
+		$this->assertTrue($this->Controller->Permit->_parse($testRoute));
+
+		$testRoute = array('action' => 'inDex');
+		$this->assertTrue($this->Controller->Permit->_parse($testRoute));
 	}
 
 	function testDenyAccess() {
@@ -468,6 +512,7 @@ class PermitTest extends CakeTestCase {
 
 	function testStartup() {
 		$this->Controller->Permit->settings['isTest'] = false;
+
 		$this->Controller->Permit->access(
 			array('controller' => 'posts', 'action' => array('add', 'edit', 'delete')),
 			array('auth' => true),
@@ -489,6 +534,21 @@ class PermitTest extends CakeTestCase {
 
 		$this->Controller->Permit->access(
 			array('controller' => 'posts', 'action' => 'index'),
+			array('auth' => true),
+			array('redirect' => array('controller' => 'users', 'action' => 'login'))
+		);
+		$this->Controller->Permit->startup($this->Controller);
+		$this->assertEqual($this->Controller->testUrl, '/users/login');
+		$this->Controller->testUrl = null;
+
+		$this->Controller->params = $this->Controller->Permit->_requestParams = array(
+			'pass' => array(),  'named' => array(),
+			'plugin' => '', 'controller' => 'blog_posts',
+			'action' => 'index'
+		);
+		$this->Controller->Permit->startup($this->Controller);
+		$this->Controller->Permit->access(
+			array('controller' => 'blogPosts', 'action' => 'index'),
 			array('auth' => true),
 			array('redirect' => array('controller' => 'users', 'action' => 'login'))
 		);
@@ -614,5 +674,5 @@ class PermitTest extends CakeTestCase {
 		$this->assertEqual(end($Permit->routes), $expected);
 		reset($Permit->routes);
 	}
+
 }
-?>
