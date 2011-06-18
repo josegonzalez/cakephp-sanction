@@ -153,7 +153,6 @@ class PermitTestController extends Controller {
  * @return void
  */
 	function logout() {
-		// $this->redirect($this->Auth->logout());
 	}
 
 /**
