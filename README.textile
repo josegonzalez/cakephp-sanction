@@ -79,7 +79,7 @@ Then you will want to setup some permissions...
 
 Create a file called @permit.php@ in your @app/config/@ folder. You'll need to do the following:
 
-# Add @App::import('Component', 'PermitComponent');@
+# Add @App::import('Component', 'Sanction.PermitComponent');@
 # Define some rules (these will be outlined below) - Permit::access();
 
 You can test those rules by browsing to the url you are protecting.
