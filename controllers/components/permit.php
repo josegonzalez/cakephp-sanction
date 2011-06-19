@@ -265,8 +265,6 @@ class PermitComponent extends Object {
  * @return array Array of connected routes
  */
 	function access($route, $rules = array(), $redirect = array()) {
-		if (empty($rules)) return;
-
 		$redirect = array_merge(array(
 				'redirect' => '/',
 				'message' => __('Access denied', true),
