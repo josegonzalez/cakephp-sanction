@@ -79,7 +79,7 @@ Then you will want to setup some permissions...
 
 Create a file called @permit.php@ in your @app/config/@ folder. You'll need to do the following:
 
-# Add @App::import('Component', 'Sanction.PermitComponent');@
+# Add @App::uses('Permit', 'Sanction.Controller/Component');@
 # Define some rules (these will be outlined below) - Permit::access();
 
 You can test those rules by browsing to the url you are protecting.
@@ -100,7 +100,7 @@ Then you will want to setup some permissions...
 
 Create a file called @permit.php@ in your @app/config/@ folder. You'll need to do the following:
 
-# Add @App::import('Component', 'PermitComponent');@
+# Add @App::uses('Permit', 'Sanction.Controller/Component');@
 # Define some rules (these will be outlined below)
 
 Then create links in your views using @$this->Clearance->link()@ instead of @$this->Html->link()@. If the currently logged in user (or not logged in user) has access as defined by the @app/config/permit.php@ file, then the link will appear in whatever view the ClearanceHelper was created in.
@@ -136,7 +136,7 @@ Rules are defined by @Permit::access();@ and can contain 3 arrays:
 An example @app/config/permit.php@:
 
 <pre><code><?php
-App::import('Component', 'PermitComponent');
+App::uses('Permit', 'Sanction.Controller/Component');
 
 // no associated model, example: looks for $sessionUser['group'] == 'admin'
 Permit::access(
@@ -161,7 +161,7 @@ For the above, the following actions will be affected:
 The user must have be in the @admin@ group (first example as a field on the user model, second as an assocaited Group model), and if they are not, they will be redirected to @/users/login@.
 
 <pre><code><?php
-App::import('Component', 'PermitComponent');
+App::uses('Permit', 'Sanction.Controller/Component');
 
 // no associated model, example: looks for $sessionUser['group'] == 'admin'
 Permit::access(
@@ -183,7 +183,7 @@ For the above, the following actions will be affected:
 The user must have a field 'group' with a value of @admin@, and if they do not, they will be redirected to @/users/login@. A flash message at the key @flash@ using the @comment@ element will also be displayed, which will contain the message '@You must be logged in to comment@'.
 
 <pre><code><?php
-App::import('Component', 'PermitComponent');
+App::uses('Permit', 'Sanction.Controller/Component');
 
 Permit::access(
 	array('controller' => array('comments'), 'action' => array('add')),
@@ -202,7 +202,7 @@ The user must authenticated, and if they are not, they will be redirected to @/u
 
 
 <pre><code><?php
-App::import('Component', 'PermitComponent');
+App::uses('Permit', 'Sanction.Controller/Component');
 
 // no associated model, example: looks for $sessionUser['group'] == 'admin'
 Permit::access(

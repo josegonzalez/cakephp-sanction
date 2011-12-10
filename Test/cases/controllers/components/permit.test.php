@@ -17,7 +17,8 @@
  * @since         CakePHP(tm) v 1.2.0.5347
  * @license       http://www.opensource.org/licenses/opengroup.php The Open Group Test Suite License
  */
-App::import('Component', array('Sanction.Permit', 'Session'));
+App::uses('PermitComponent', 'Sanction.Controller/Component');
+App::uses('Session', 'Controller/Component');
 
 /**
 * TestAuthComponent class

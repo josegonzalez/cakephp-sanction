@@ -29,7 +29,7 @@ class ClearanceHelper extends AppHelper {
  * @var array
  * @access public
  */
-	var $helpers = array('Html', 'Session');
+	public $helpers = array('Html', 'Session');
 
 /**
  * Array of routes connected with Permit::access()
@@ -37,7 +37,7 @@ class ClearanceHelper extends AppHelper {
  * @var array
  * @access public
  */
-	var $routes = array();
+	public $routes = array();
 
 
 /**
@@ -48,7 +48,7 @@ class ClearanceHelper extends AppHelper {
  * @var array
  * @access public
  */
-	var $settings = array(
+	public $settings = array(
 		'path'  => 'Auth.User',
 		'check' => 'id',
 	);
@@ -56,12 +56,12 @@ class ClearanceHelper extends AppHelper {
 /**
  * Sets the $this->helper to the helper configured in the session
  *
- * @return void
- * @access public
- * @author Jose Diaz-Gonzalez
- **/
-	function __construct($config = array()) {
-		$this->settings = array_merge($this->settings, (array) $config);
+ * @param View $View The View this helper is being attached to.
+ * @param array $settings Configuration settings for the helper.
+ */
+	public function __construct(View $View, $settings = array()) {
+		$this->settings = array_merge($this->settings, (array) $settings);
+		parent::__construct($View, $settings);
 	}
 
 /**
@@ -86,7 +86,7 @@ class ClearanceHelper extends AppHelper {
  * @access public
  * @author Jose Diaz-Gonzalez
  */
-	function link($title, $url = null, $options = array(), $confirmMessage = false) {
+	public function link($title, $url = null, $options = array(), $confirmMessage = false) {
 		if (!is_array($url)) return $this->Html->link($title, $url, $options, $confirmMessage);
 
 		if (!isset($url['plugin']) && !empty($url['plugin'])) $url['plugin'] = $this->params['plugin'];
@@ -120,7 +120,7 @@ class ClearanceHelper extends AppHelper {
  * @access public
  * @author Jose Diaz-Gonzalez
  */
-	function parse(&$currentRoute, &$permit) {
+	public function parse(&$currentRoute, &$permit) {
 		$route = $permit['route'];
 
 		$count = count($route);
@@ -152,7 +152,7 @@ class ClearanceHelper extends AppHelper {
  * @access public
  * @author Jose Diaz-Gonzalez
  */
-	function execute($route, $title, $url = null, $options = array(), $confirmMessage = false) {
+	public function execute($route, $title, $url = null, $options = array(), $confirmMessage = false) {
 		if (empty($route['rules'])) return $this->Html->link($title, $url, $options, $confirmMessage);
 
 		if (isset($route['rules']['deny'])) {

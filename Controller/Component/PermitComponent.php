@@ -7,23 +7,23 @@
  * @package       sanction
  * @subpackage    sanction.controller.components
  */
-class PermitComponent extends Object {
+class PermitComponent extends Component {
 
 /**
  * Other components utilized by PermitComponent
  *
- * @var array
+ * @public array
  * @access public
  */
-	var $components = array('Session');
+	public $components = array('Session');
 
 /**
  * Parameter data from Controller::$params
  *
- * @var array
+ * @public array
  * @access public
  */
-	var $settings = array(
+	public $settings = array(
 		'path' => 'Auth.User',
 		'check' => 'id',
 		'isTest' => false,
@@ -32,33 +32,50 @@ class PermitComponent extends Object {
 /**
  * Array of routes connected with PermitComponent::access()
  *
- * @var array
+ * @public array
  * @access public
  */
-	var $routes = array();
+	public $routes = array();
 
 /**
  * Array containing executed route
  *
- * @var array
+ * @public array
  * @access public
  */
-	var $executed = null;
+	public $executed = null;
 
 /**
  * Maintains current logged in user.
  *
- * @var boolean
+ * @public boolean
  * @access protected
  */
-	var $_user = null;
+	public $_user = null;
 
 /**
  * Current request parameters
  *
- * @var array
+ * @public array
  */
-	var $_requestParams = array();
+	public $_requestParams = array();
+
+/**
+ * Constructor.
+ *
+ * @param ComponentCollection $collection
+ * @param array $settings
+ */
+	public function __construct(ComponentCollection $collection, $settings = array()) {
+		if (!include(APP . 'Config' . DS . 'permit.php')) {
+			trigger_error("File containing permissions not found.  It should be located at " . APP_PATH . DS . 'config' . DS . "permit.php", E_USER_ERROR);
+		}
+
+		$settings = array_merge($this->settings, $settings);
+		parent::__construct($collection, $settings);
+
+		Permit::$settings = $this->settings;
+	}
 
 /**
  * Initializes SanctionComponent for use in the controller
@@ -67,18 +84,15 @@ class PermitComponent extends Object {
  * @return void
  * @access public
  */
-	function initialize(&$controller, $config = array()) {
-		if (!include(CONFIGS . 'permit.php')) {
-			trigger_error("File containing permissions not found.  It should be located at " . APP_PATH . DS . 'config' . DS . "permit.php", E_USER_ERROR);
-		}
-
-		$this->settings = array_merge($this->settings, $config);
+	function initialize(&$controller) {
 		if ($this->settings['isTest']) return;
 
-		$Permit =& PermitComponent::getInstance();
-		$this->routes = $Permit->routes;
+		$this->_user = $this->Session->read("{$this->settings['path']}");
 
-		$this->_requestParams = $controller->params;
+		$this->routes = Permit::$routes;
+		Permit::$user = $this->_user;
+
+		$this->_requestParams = $controller->request->params;
 		foreach (array('controller', 'plugin') as $inflected) {
 			if (isset($this->_requestParams[$inflected])) {
 				$this->_requestParams[$inflected] = strtolower(Inflector::underscore($this->_requestParams[$inflected]));
@@ -173,8 +187,7 @@ class PermitComponent extends Object {
  * @return boolean True if redirect should be executed, false otherwise
  */
 	function _execute($route) {
-		$Permit =& PermitComponent::getInstance();
-		$Permit->executed = $this->executed = $route;
+		Permit::$executed = $this->executed = $route;
 
 		if (empty($route['rules'])) {
 			return false;
@@ -205,7 +218,6 @@ class PermitComponent extends Object {
 			return false;
 		}
 
-		$this->_user = $this->Session->read("{$this->settings['path']}");
 		if ($this->_user == false) {
 			return true;
 		}
@@ -265,6 +277,55 @@ class PermitComponent extends Object {
  * @return array Array of connected routes
  */
 	function access($route, $rules = array(), $redirect = array()) {
+		$this->routes[] = Permit::access($route, $rules, $redirect);
+	}
+
+/**
+ * Returns the referring URL for this request.
+ *
+ * @param mixed $default Default URL to use if Session cannot be read
+ * @return string Referring URL
+ * @access public
+ */
+	function referer($referer = null) {
+		if ($this->Session->check('Sanction.referer')) {
+			$referer = $this->Session->read('Sanction.referer');
+			$this->Session->delete('Sanction.referer');
+		}
+
+		if ($referer === null) {
+			return false;
+		}
+
+		return Router::normalize($referer);
+	}
+
+}
+
+/**
+ * Permit class
+ *
+ * Connects routes for a given request
+ *
+ * @package       sanction
+ * @subpackage    sanction.controller.components
+ */
+class Permit extends Object {
+
+	static $executed = null;
+	static $routes = array();
+	static $settings = null;
+	static $user = null;
+
+/**
+ * Connects a route to a given ruleset
+ *
+ * @param array $route array describing a route
+ * @param array $rules array of rules regarding the route
+ * @param array $redirect Array containing the url to redirect to on route fail
+ * @return array Array of connected routes
+ */
+	public static function access($route, $rules = array(), $redirect = array()) {
 		$redirect = array_merge(array(
 				'redirect' => '/',
 				'message' => __('Access denied', true),
@@ -308,84 +369,8 @@ class PermitComponent extends Object {
 			'key' => $redirect['key'],
 		);
 
-		$this->routes[] = $newRoute;
-	}
-
-/**
- * Returns the referring URL for this request.
- *
- * @param mixed $default Default URL to use if Session cannot be read
- * @return string Referring URL
- * @access public
- */
-	function referer($referer = null) {
-		if ($this->Session->check('Sanction.referer')) {
-			$referer = $this->Session->read('Sanction.referer');
-			$this->Session->delete('Sanction.referer');
-		}
-
-		if ($referer === null) {
-			return false;
-		}
-
-		return Router::normalize($referer);
-	}
-
-/**
- * Gets a reference to the PermitComponent object instance
- *
- * @return PermitComponent Instance of the PermitComponent.
- * @access public
- * @static
- */
-	function &getInstance() {
-		static $instance = array();
-
-		if (!$instance) {
-			$instance[0] =& new PermitComponent();
-		}
-		return $instance[0];
-	}
-
-}
-
-/**
- * Permit class
- *
- * Connects routes for a given request
- *
- * @package       sanction
- * @subpackage    sanction.controller.components
- */
-class Permit extends Object {
-
-/**
- * Connects a route to a given ruleset
- *
- * @param array $route array describing a route
- * @param array $rules array of rules regarding the route
- * @param array $redirect Array containing the url to redirect to on route fail
- * @return array Array of connected routes
- */
-	function access($route, $rules = array(), $redirect = array()) {
-		$Permit =& PermitComponent::getInstance();
-		$Permit->access($route, $rules, $redirect);
-	}
-
-/**
- * Gets a reference to the Permit object instance
- *
- * @return object Instance of the Permit.
- * @access public
- * @static
- */
-	function &getInstance() {
-		static $instance = array();
-
-		if (!$instance) {
-			$instance[0] =& new Permit();
-		}
-		return $instance[0];
+		self::$routes[] = $newRoute;
+		return $newRoute;
 	}
 
 }

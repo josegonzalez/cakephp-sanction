@@ -1,5 +1,5 @@
 <?php
-class AccessComponent extends Object {
+class AccessComponent extends Component {
 	var $settings = array();
 
 	var $defaults = array(
