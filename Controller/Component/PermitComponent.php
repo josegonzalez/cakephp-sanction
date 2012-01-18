@@ -224,7 +224,7 @@ class PermitComponent extends Component {
 			return false;
 		}
 
-		$count = count($route['rules']['auth']);
+		$count = count(set::flatten($route['rules']['auth']));
 		if ($count == 0) {
 			return false;
 		}
