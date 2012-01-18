@@ -531,6 +531,32 @@ class PermitTest extends CakeTestCase {
 		$testRoute = array('rules' => array('auth' => array('Group.name' => array('admin', 'editors'))));
 		$this->assertFalse($this->Controller->Permit->_execute($testRoute));
 		$this->assertEqual($this->Controller->Permit->executed, $testRoute);
+
+		# test for passing multiple values in a field - using 'or' option
+		$testRoute = array('rules' => array(
+			'auth' => array('Group.name' => array('something-else', 'something-else-2')),
+			'fields_behavior' => 'or'
+		));
+		$this->assertTrue($this->Controller->Permit->_execute($testRoute));
+		$this->assertEqual($this->Controller->Permit->executed, $testRoute);
+		$testRoute = array('rules' => array(
+			'auth' => array('Group.name' => array('admin', 'something-else-2')),
+			'fields_behavior' => 'or'
+		));
+		$this->assertFalse($this->Controller->Permit->_execute($testRoute));
+		$this->assertEqual($this->Controller->Permit->executed, $testRoute);
+		$testRoute = array('rules' => array(
+			'auth' => array('Group.name' => array('something-else', 'editors')),
+			'fields_behavior' => 'or'
+		));
+		$this->assertFalse($this->Controller->Permit->_execute($testRoute));
+		$this->assertEqual($this->Controller->Permit->executed, $testRoute);
+		$testRoute = array('rules' => array(
+			'auth' => array('Group.name' => array('admin', 'editors')),
+			'fields_behavior' => 'or'
+		));
+		$this->assertFalse($this->Controller->Permit->_execute($testRoute));
+		$this->assertEqual($this->Controller->Permit->executed, $testRoute);
 	}
 
 	function testStartup() {
