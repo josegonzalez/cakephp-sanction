@@ -517,6 +517,20 @@ class PermitTest extends CakeTestCase {
 		$testRoute = array('rules' => array('auth' => array('Group.name' => 'something-else')));
 		$this->assertTrue($this->Controller->Permit->_execute($testRoute));
 		$this->assertEqual($this->Controller->Permit->executed, $testRoute);
+
+		# test for passing multiple values in a field - default behavior should be 'and' 
+		$testRoute = array('rules' => array('auth' => array('Group.name' => array('something-else', 'something-else-2'))));
+		$this->assertTrue($this->Controller->Permit->_execute($testRoute));
+		$this->assertEqual($this->Controller->Permit->executed, $testRoute);
+		$testRoute = array('rules' => array('auth' => array('Group.name' => array('admin', 'something-else'))));
+		$this->assertTrue($this->Controller->Permit->_execute($testRoute));
+		$this->assertEqual($this->Controller->Permit->executed, $testRoute);
+		$testRoute = array('rules' => array('auth' => array('Group.name' => array('something-else', 'editors'))));
+		$this->assertTrue($this->Controller->Permit->_execute($testRoute));
+		$this->assertEqual($this->Controller->Permit->executed, $testRoute);
+		$testRoute = array('rules' => array('auth' => array('Group.name' => array('admin', 'editors'))));
+		$this->assertFalse($this->Controller->Permit->_execute($testRoute));
+		$this->assertEqual($this->Controller->Permit->executed, $testRoute);
 	}
 
 	function testStartup() {
