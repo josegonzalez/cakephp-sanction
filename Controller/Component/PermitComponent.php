@@ -1,4 +1,7 @@
 <?php
+App::uses('Component', 'Controller');
+App::uses('Router', 'Routing');
+
 /**
  * Permit component class
  *
@@ -67,13 +70,15 @@ class PermitComponent extends Component {
  * @param array $settings
  */
 	public function __construct(ComponentCollection $collection, $settings = array()) {
-		if (!include(APP . 'Config' . DS . 'permit.php')) {
-			trigger_error("File containing permissions not found.  It should be located at " . APP_PATH . DS . 'config' . DS . "permit.php", E_USER_ERROR);
+		$settings = array_merge($this->settings, $settings);
+
+		if (!$settings['isTest']) {
+			if (!include(APP . 'Config' . DS . 'permit.php')) {
+				trigger_error("File containing permissions not found.  It should be located at " . APP_PATH . DS . 'config' . DS . "permit.php", E_USER_ERROR);
+			}
 		}
 
-		$settings = array_merge($this->settings, $settings);
 		parent::__construct($collection, $settings);
-
 		Permit::$settings = $this->settings;
 	}
 
@@ -84,18 +89,21 @@ class PermitComponent extends Component {
  * @return void
  * @access public
  */
-	function initialize(&$controller) {
-		if ($this->settings['isTest']) return;
+	public function initialize($controller) {
+		if ($this->settings['isTest']) {
+			return;
+		}
 
 		$this->_user = $this->Session->read("{$this->settings['path']}");
 
 		$this->routes = Permit::$routes;
 		Permit::$user = $this->_user;
 
-		$this->_requestParams = $controller->request->params;
+		$this->request = $controller->request;
+
 		foreach (array('controller', 'plugin') as $inflected) {
-			if (isset($this->_requestParams[$inflected])) {
-				$this->_requestParams[$inflected] = strtolower(Inflector::underscore($this->_requestParams[$inflected]));
+			if (isset($this->request->params[$inflected])) {
+				$this->request->params[$inflected] = strtolower(Inflector::underscore($this->request->params[$inflected]));
 			}
 		}
 	}
@@ -110,20 +118,22 @@ class PermitComponent extends Component {
  * @access public
  */
 	function startup(&$controller) {
-		if ($this->settings['isTest']) return;
+		if ($this->settings['isTest']) {
+			return;
+		}
 
 		foreach ($this->routes as $route) {
 			if ($this->_parse($route['route'])) {
 				if ($this->_execute($route)) {
-					if (isset($this->_requestParams['url']['url'])) {
-						$url = $this->_requestParams['url']['url'];
+					if (isset($this->request->params['url']['url'])) {
+						$url = $this->request->params['url']['url'];
 					} else {
-						$url = $this->_requestParams;
+						$url = $this->request->params;
 					}
 
 					$url = Router::normalize($url);
-					if (!empty($this->_requestParams['url']) && count($this->_requestParams['url']) >= 2) {
-						$query = $this->_requestParams['url'];
+					if (!empty($this->request->params['url']) && count($this->request->params['url']) >= 2) {
+						$query = $this->request->params['url'];
 						unset($query['url'], $query['ext']);
 						$url .= Router::queryString($query, array());
 					}
@@ -150,9 +160,9 @@ class PermitComponent extends Component {
 		}
 
 		foreach ($route as $key => $value) {
-			if (isset($this->_requestParams[$key])) {
+			if (isset($this->request->params[$key])) {
 				$values = (array) $value;
-				$check = (array) $this->_requestParams[$key];
+				$check = (array) $this->request->params[$key];
 
 				if (!count($values) && in_array(null, $check)) {
 					$count--;
@@ -320,6 +330,9 @@ class Permit extends Object {
 /**
  * Connects a route to a given ruleset
  *
+ * Also converts underscored names to camelCase as
+ * additional way of accessing a controller
+ *
  * @param array $route array describing a route
  * @param array $rules array of rules regarding the route
  * @param array $redirect Array containing the url to redirect to on route fail
@@ -336,7 +349,6 @@ class Permit extends Object {
 			$redirect
 		);
 
-		//convert underscored names to camelCase as additional way of accessing a controller
 		foreach (array('controller', 'plugin') as $inflected) {
 			if (isset($route[$inflected])) {
 				if (is_array($route[$inflected])) {
