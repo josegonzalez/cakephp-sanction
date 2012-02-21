@@ -1,30 +1,37 @@
 <?php
 App::uses('Component', 'Controller');
 App::uses('Router', 'Routing');
+App::uses('CakeException', 'Error');
+
+/**
+ * Exception class for Permit Component.  This exception will be thrown from Permit
+ * component when it encounters an error.
+ *
+ * @package       Sanction.Controller.Components
+ */
+class PermitException extends CakeException { }
 
 /**
  * Permit component class
  *
  * Manages user access to a given route
  *
- * @package       sanction
- * @subpackage    sanction.controller.components
+ * @package       Sanction
+ * @subpackage    Sanction.Controller.Components
  */
 class PermitComponent extends Component {
 
 /**
  * Other components utilized by PermitComponent
  *
- * @public array
- * @access public
+ * @param array
  */
 	public $components = array('Session');
 
 /**
  * Parameter data from Controller::$params
  *
- * @public array
- * @access public
+ * @param array
  */
 	public $settings = array(
 		'path' => 'Auth.User',
@@ -35,31 +42,28 @@ class PermitComponent extends Component {
 /**
  * Array of routes connected with PermitComponent::access()
  *
- * @public array
- * @access public
+ * @param array
  */
 	public $routes = array();
 
 /**
  * Array containing executed route
  *
- * @public array
- * @access public
+ * @param array
  */
 	public $executed = null;
 
 /**
  * Maintains current logged in user.
  *
- * @public boolean
- * @access protected
+ * @param boolean
  */
 	public $_user = null;
 
 /**
  * Current request parameters
  *
- * @public array
+ * @param array
  */
 	public $_requestParams = array();
 
@@ -74,7 +78,7 @@ class PermitComponent extends Component {
 
 		if (!$settings['isTest']) {
 			if (!include(APP . 'Config' . DS . 'permit.php')) {
-				trigger_error("File containing permissions not found.  It should be located at " . APP_PATH . DS . 'config' . DS . "permit.php", E_USER_ERROR);
+				throw new PermitException("File containing permissions not found.  It should be located at " . APP_PATH . DS . 'config' . DS . "permit.php");
 			}
 		}
 
