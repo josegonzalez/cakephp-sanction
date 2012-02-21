@@ -123,25 +123,21 @@ class PermitComponent extends Component {
 		}
 
 		foreach ($this->routes as $route) {
-			if ($this->_parse($route['route'])) {
-				if ($this->_execute($route)) {
-					if (isset($this->request->params['url']['url'])) {
-						$url = $this->request->params['url']['url'];
-					} else {
-						$url = $this->request->params;
-					}
+			if (!$this->_parse($route['route'])) {
+				continue;
+			}
 
-					$url = Router::normalize($url);
-					if (!empty($this->request->params['url']) && count($this->request->params['url']) >= 2) {
-						$query = $this->request->params['url'];
-						unset($query['url'], $query['ext']);
-						$url .= Router::queryString($query, array());
-					}
-					$this->Session->write('Sanction.referer', $url);
-					$this->redirect($controller, $route);
-				}
+			if (!$this->_execute($route)) {
 				break;
 			}
+
+			$url = Router::normalize($this->request->params);
+			if (!empty($this->request->query)) {
+				$url .= Router::queryString($this->request->query, array());
+			}
+
+			$this->Session->write('Sanction.referer', $url);
+			return $this->redirect($controller, $route);
 		}
 	}
 
@@ -186,6 +182,7 @@ class PermitComponent extends Component {
 				}
 			}
 		}
+
 		return ($count == 0);
 	}
 
