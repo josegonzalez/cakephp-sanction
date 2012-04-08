@@ -200,7 +200,7 @@ class PermitComponent extends Object {
 			return false;
 		}
 
-		$count = count($route['rules']['auth']);
+		$count = $original_count = count(set::flatten($route['rules']['auth']));
 		if ($count == 0) {
 			return false;
 		}
@@ -235,6 +235,9 @@ class PermitComponent extends Object {
 			}
 		}
 
+		if (!empty($route['rules']['fields_behavior']) && strtolower($route['rules']['fields_behavior']) == 'or') {
+			return $count >= $original_count;
+		}
 		return $count != 0;
 	}
 
