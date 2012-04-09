@@ -143,8 +143,8 @@ Rules are defined by `Permit::access();` and can contain 3 arrays:
 
 * Array of rules upon which we will control access
 * Array of rules by which the User's session must be defined by
-** If you restrict to a single model and don't use associated data, you can enter just the fieldname to match on in the Auth array
-** If you use associated models, you need to specify a `Set::extract()` path as the fieldname
+  * If you restrict to a single model and don't use associated data, you can enter just the fieldname to match on in the Auth array
+  * If you use associated models, you need to specify a `Set::extract()` path as the fieldname
 * Array of extra parameters, such as where to redirect, the flash message, etc.
 
 An example `app/Config/permit.php`:
