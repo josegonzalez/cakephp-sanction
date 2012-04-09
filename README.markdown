@@ -264,6 +264,26 @@ In order to specify the rules such that an admin user can edit posts, the rules 
 	    array('redirect' => array('controller' => 'users', 'action' => 'account')
 	);
 
+#### Example Rules
+
+Allowing anonymous access:
+
+    Permit::access(
+        array('controller' => array('posts'), 'action' => array('index')),
+        array(),
+        array()
+    );
+
+Allowing access to multiple roles:
+
+    Permit::access(
+        array('controller' => array('posts'), 'action' => array('add', 'delete')),
+        array('auth' => array('User.role' => array('user', 'admin'))),
+        array('redirect' => array('controller' => 'posts', 'action' => 'index'),
+              'message' => 'You are not authorized to perform the requested action.'
+        )
+    );
+
 ## Todo
 
 * More Unit Tests
