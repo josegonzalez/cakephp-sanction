@@ -230,6 +230,40 @@ For the above, any route with an admin prefix would be affected.
 
 The user must be in the group `admin`, and if they are not, they will be redirected to `/users/login`.
 
+#### Rules Specificity
+
+As with routes, all rules must be specified in order of most specific to least specific. The following two examples will illustrate this:
+
+	// If this access declaration comes first, this will be the
+	// ONLY declaration that Sanction uses. Once this fails,
+	// Sanction will not continue on to other rules
+	Permit::access(
+	    array('controller' => array('posts', 'categories', 'comments'),
+	    array('auth' => array('User.role' => array('admin'))),
+	    array('redirect' => array('controller' => 'users', 'action' => 'account')
+	);
+
+	// So this declaration will be effectively useless.
+	Permit::access(
+	    array('controller' => array('posts'), 'action' => array('edit'),
+	    array('auth' => array('User.role' => array('manager', 'admin'))),
+	    array('redirect' => array('controller' => 'users', 'action' => 'account')
+	);
+
+In order to specify the rules such that an admin user can edit posts, the rules would need to be switched. The most restrictive rule - i.e. the one that limits the controller AND action, as opposed to just the controller - should come first. The following will work as expected:
+
+	Permit::access(
+	    array('controller' => array('posts'), 'action' => array('edit'),
+	    array('auth' => array('User.role' => array('manager', 'admin'))),
+	    array('redirect' => array('controller' => 'users', 'action' => 'account')
+	);
+
+	Permit::access(
+	    array('controller' => array('posts', 'configs', 'comments'),
+	    array('auth' => array('User.role' => array('admin'))),
+	    array('redirect' => array('controller' => 'users', 'action' => 'account')
+	);
+
 ## Todo
 
 * More Unit Tests
