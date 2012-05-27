@@ -4,7 +4,7 @@ class PermitPanel extends DebugPanel {
 	var $elementName = 'permit_panel';
 	var $title = 'Permit';
 
-	function beforeRender(&$controller) {
+	function beforeRender(Controller &$controller) {
 		if (empty(Permit::$user)) {
 			Permit::$user = $controller->Toolbar->Session->read(Permit::$settings['path']);
 		}
@@ -15,4 +15,3 @@ class PermitPanel extends DebugPanel {
 		);
 	}
 }
-?>
