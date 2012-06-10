@@ -1,10 +1,9 @@
 <?php
 class PermitPanel extends DebugPanel {
-	var $plugin = 'sanction';
-	var $elementName = 'permit_panel';
-	var $title = 'Permit';
 
-	function beforeRender(Controller &$controller) {
+	public $plugin = 'sanction';
+
+	public function beforeRender(Controller $controller) {
 		if (empty(Permit::$user)) {
 			Permit::$user = $controller->Toolbar->Session->read(Permit::$settings['path']);
 		}
@@ -14,4 +13,5 @@ class PermitPanel extends DebugPanel {
 			'executed' => Permit::$executed
 		);
 	}
+
 }

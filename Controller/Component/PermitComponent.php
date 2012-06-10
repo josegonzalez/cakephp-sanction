@@ -93,7 +93,7 @@ class PermitComponent extends Component {
  * @return void
  * @access public
  */
-	public function initialize($controller) {
+	public function initialize(Controller $controller) {
 		if ($this->settings['isTest']) {
 			return;
 		}
@@ -121,7 +121,7 @@ class PermitComponent extends Component {
  * @return boolean
  * @access public
  */
-	function startup(&$controller) {
+	function startup(Controller $controller) {
 		if ($this->settings['isTest']) {
 			return;
 		}
@@ -192,7 +192,7 @@ class PermitComponent extends Component {
 
 /**
  * Determines whether the given user is authorized to perform an action.  The result of
- * a failed request depends upon the options for the route 
+ * a failed request depends upon the options for the route
  *
  * @param array $route A Permit Route
  * @return boolean True if redirect should be executed, false otherwise
