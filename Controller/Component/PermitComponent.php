@@ -80,13 +80,13 @@ class PermitComponent extends Component {
 
 		if (!$settings['isTest']) {
 			if (!file_exists($settings['permit_include_path'])) {
-				throw new PermitException("File containing permissions not found.  It should be located at " . APP . DS . 'config' . DS . "permit.php");
+				throw new PermitException("File containing permissions not found.  It should be located at " . APP . 'Config' . DS . "permit.php");
 			}
 
 			try {
 				include $settings['permit_include_path'] ;
 			} catch (Exception $e) {
-				throw new PermitException("File containing permissions not found.  It should be located at " . APP_PATH . DS . 'config' . DS . "permit.php");
+				throw new PermitException("File containing permissions not found.  It should be located at " . APP . 'config' . DS . "permit.php");
 			}
 		}
 
