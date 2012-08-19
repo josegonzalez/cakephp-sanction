@@ -75,10 +75,17 @@ class PermitComponent extends Component {
  * @param array $settings
  */
 	public function __construct(ComponentCollection $collection, $settings = array()) {
+		$this->settings['permit_include_path'] = APP . 'Config' . DS . 'permit.php';
 		$settings = array_merge($this->settings, $settings);
 
 		if (!$settings['isTest']) {
-			if (!include(APP . 'Config' . DS . 'permit.php')) {
+			if (!file_exists($settings['permit_include_path'])) {
+				throw new PermitException("File containing permissions not found.  It should be located at " . APP . DS . 'config' . DS . "permit.php");
+			}
+
+			try {
+				include $settings['permit_include_path'] ;
+			} catch (Exception $e) {
 				throw new PermitException("File containing permissions not found.  It should be located at " . APP_PATH . DS . 'config' . DS . "permit.php");
 			}
 		}
@@ -225,10 +232,7 @@ class PermitComponent extends Component {
 			}
 
 			return false;
-		}
-
-		$count = count(Set::flatten($route['rules']['auth']));
-		if ($count === 0) {
+		} elseif (!is_array($route['rules']['auth'])) {
 			return false;
 		}
 
@@ -245,12 +249,7 @@ class PermitComponent extends Component {
 			$fieldsBehavior = 'and';
 		}
 
-		// We previously count the number of rules
-		// In this loop, whenever we see a match of a the user with the rules,
-		// we decrement that count. A user must match ALL the rules, otherwise
-		// we just redirect them. At the end, we should have no rules left,
-		// or a count of zero
-		// $rules = Set::flatten($route['rules']['auth']);
+		$count = count(Set::flatten($route['rules']['auth']));
 		foreach ($route['rules']['auth'] as $path => $condition) {
 			$path = '/' . str_replace('.', '/', $path);
 			$path = preg_replace('/^([\/]+)/', '/', $path);
