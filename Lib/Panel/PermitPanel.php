@@ -1,4 +1,6 @@
 <?php
+App::uses('Permit', 'Sanction.Controller/Component');
+
 class PermitPanel extends DebugPanel {
 
 	public $plugin = 'sanction';
