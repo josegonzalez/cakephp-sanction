@@ -158,7 +158,7 @@ An example `app/Config/permit.php`:
 		array('redirect' => array('controller' => 'users', 'action' => 'login'))
 	);
 
-	// with associated model, example: looks for in_array('admin',set::extract('/Group/name',$sessionUser))
+	// with associated model, example: looks for in_array('admin', Set::extract('/Group/name',$sessionUser))
 	Permit::access(
 		array('controller' => 'posts', 'action' => array('add', 'edit', 'delete')),
 		array('auth' => array('Group.name' => 'admin')),
@@ -219,7 +219,7 @@ The user must authenticated, and if they are not, they will be redirected to `/u
 		array('auth' => array('group' => 'admin')),
 		array('redirect' => array('admin' => false, 'controller' => 'users', 'action' => 'login')));
 
-	// with associated model, example: looks for in_array('admin',set::extract('/Group/name',$sessionUser))
+	// with associated model, example: looks for in_array('admin', Set::extract('/Group/name',$sessionUser))
 	Permit::access(
 		array('prefix' => 'admin'),
 		array('auth' => array('Group.name' => 'admin')),

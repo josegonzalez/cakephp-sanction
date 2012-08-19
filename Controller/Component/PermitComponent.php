@@ -2,6 +2,7 @@
 App::uses('Component', 'Controller');
 App::uses('Router', 'Routing');
 App::uses('CakeException', 'Error');
+App::uses('Set', 'Utility');
 
 /**
  * Exception class for Permit Component.  This exception will be thrown from Permit
@@ -218,14 +219,16 @@ class PermitComponent extends Component {
 			if ($route['rules']['auth'] == true && !$is_authed) {
 				return true;
 			}
+
 			if ($route['rules']['auth'] == false && $is_authed) {
 				return true;
 			}
+
 			return false;
 		}
 
-		$count = $original_count = count(set::flatten($route['rules']['auth']));
-		if ($count == 0) {
+		$count = count(Set::flatten($route['rules']['auth']));
+		if ($count === 0) {
 			return false;
 		}
 
@@ -233,35 +236,56 @@ class PermitComponent extends Component {
 			return true;
 		}
 
-		foreach ($route['rules']['auth'] as $field => $value) {
-			if (!is_array($value)) {
-				$value = (array) $value;
-			}
+		$fieldsBehavior = 'and';
+		if (!empty($route['rules']['fields_behavior'])) {
+			$fieldsBehavior = strtolower($route['rules']['fields_behavior']);
+		}
 
-			if (strpos($field, '.') !== false) {
-				$field = '/'. str_replace('.', '/', $field);
-			}
+		if (!in_array($fieldsBehavior, array('and', 'or'))) {
+			$fieldsBehavior = 'and';
+		}
 
-			if ($field[0] == "/") {
-				$values = (array) Set::extract($field, $this->_user);
-				foreach ($value as $condition) {
-					if (in_array($condition, $values)) {
-						$count--;
-					}
+		// We previously count the number of rules
+		// In this loop, whenever we see a match of a the user with the rules,
+		// we decrement that count. A user must match ALL the rules, otherwise
+		// we just redirect them. At the end, we should have no rules left,
+		// or a count of zero
+		// $rules = Set::flatten($route['rules']['auth']);
+		foreach ($route['rules']['auth'] as $path => $condition) {
+			$path = '/' . str_replace('.', '/', $path);
+			$path = preg_replace('/^([\/]+)/', '/', $path);
+
+			$check = $condition;
+			$continue = false;
+			$decrement = 1;
+			$values = Set::extract($path, $this->_user);
+
+			// Support for OR Model-syntax
+			foreach (array('or', 'OR') as $anOr) {
+				if (isset($condition[$anOr])) {
+					$check = $condition[$anOr];
+					$continue = true;
+					$decrement = count($check);
 				}
-			} else {
-				foreach ($value as $condition) {
-					if (isset($this->_user[$field]) && $this->_user[$field] == $condition) {
-						$count--;
+			}
+
+			if ($fieldsBehavior == 'or') {
+				$check = $condition;
+				$continue = true;
+				$decrement = count($check);
+			}
+
+			foreach ((array) $check as $cond) {
+				if (in_array($cond, (array) $values)) {
+					$count -= $decrement;
+					if ($continue) {
+						continue 2;
 					}
 				}
 			}
 		}
 
-		if (!empty($route['rules']['fields_behavior']) && strtolower($route['rules']['fields_behavior']) == 'or') {
-			return $count >= $original_count;
-		}
-		return $count != 0;
+		return $count !== 0;
 	}
 
 /**

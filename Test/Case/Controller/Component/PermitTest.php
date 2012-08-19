@@ -51,7 +51,7 @@ class TestPermitComponent extends PermitComponent {
  * @access public
  * @return void
  */
-	function _stop() {
+	function _stop($status = 0) {
 		$this->testStop = true;
 	}
 }
@@ -312,47 +312,47 @@ class PermitTest extends CakeTestCase {
 	function testSingleParse() {
 		$testRoute = array();
 		$this->assertFalse($this->Permit->_parse($testRoute));
-	
+
 		$testRoute = array('controller' => 'posts');
 		$this->assertTrue($this->Permit->_parse($testRoute));
-	
+
 		$testRoute = array('controller' => 'posts', 'action' => 'index');
 		$this->assertTrue($this->Permit->_parse($testRoute));
-	
+
 		$testRoute = array('plugin' => null, 'controller' => 'posts', 'action' => 'index');
 		$this->assertTrue($this->Permit->_parse($testRoute));
-	
+
 		$testRoute = array('controller' => 'posts', 'action' => 'add');
 		$this->assertFalse($this->Permit->_parse($testRoute));
-	
+
 		$testRoute = array('controller' => 'users', 'action' => 'index');
 		$this->assertFalse($this->Permit->_parse($testRoute));
 	}
-	
+
 	function testMultipleParse() {
 		$testRoute = array('controller' => 'posts', 'action' => array('index'));
 		$this->assertTrue($this->Permit->_parse($testRoute));
-	
+
 		$testRoute = array('controller' => 'posts', 'action' => array('index', 'add'));
 		$this->assertTrue($this->Permit->_parse($testRoute));
-	
+
 		$testRoute = array('controller' => array('posts', 'users'), 'action' => array('index', 'add'));
 		$this->assertTrue($this->Permit->_parse($testRoute));
-	
+
 		$testRoute = array('plugin' => array(null, 'blog'),
 			'controller' => array('posts', 'users'),
 			'action' => array('index', 'add')
 		);
 		$this->assertTrue($this->Permit->_parse($testRoute));
-	
+
 		$testRoute = array('controller' => 'posts', 'action' => array('add', 'edit', 'delete'));
 		$this->assertFalse($this->Permit->_parse($testRoute));
 	}
-	
+
 	function testCaseAndInflectionParse() {
 		$testRoute = array('controller' => 'POSTS');
 		$this->assertTrue($this->Permit->_parse($testRoute));
-	
+
 		$this->Controller->params = $this->Permit->_requestParams = array(
 			'pass' => array(),  'named' => array(),
 			'plugin' => '', 'controller' => 'blog_posts',
@@ -360,52 +360,52 @@ class PermitTest extends CakeTestCase {
 		);
 		$testRoute = array('controller' => 'POSTS');
 		$this->assertFalse($this->Permit->_parse($testRoute));
-	
+
 		$testRoute = array('controller' => 'Blog_POSTS');
 		$this->assertTrue($this->Permit->_parse($testRoute));
-	
+
 		$testRoute = array('action' => 'inDex');
 		$this->assertTrue($this->Permit->_parse($testRoute));
 	}
-	
+
 	function testDenyAccess() {
 		$this->Controller->Permit->settings['path'] = 'MockAuthTest.User';
 		$this->Controller->Permit->settings['check'] = 'id';
-	
+
 		$testRoute = array('rules' => array());
 		$this->assertNull($this->Permit->executed);
 		$this->assertFalse($this->Permit->_execute($testRoute));
 		$this->Permit->executed = null;
-	
+
 		$testRoute = array('rules' => array('deny' => true));
 		$this->assertNull($this->Permit->executed);
 		$this->assertTrue($this->Permit->_execute($testRoute));
 		$this->assertEqual($this->Permit->executed, $testRoute);
-	
+
 		$testRoute = array('rules' => array('deny' => false));
 		$this->assertFalse($this->Permit->_execute($testRoute));
 		$this->assertEqual($this->Permit->executed, $testRoute);
 	}
-	
+
 	function testAuthenticatedUser() {
 		$this->Permit->settings['path'] = 'MockAuthTest.Member';
 		$this->Permit->settings['check'] = 'id';
-	
+
 		$testRoute = array('rules' => array('auth' => true));
 		$this->assertNull($this->Permit->executed);
 		$this->assertTrue($this->Permit->_execute($testRoute));
 		$this->assertEqual($this->Permit->executed, $testRoute);
-	
+
 		$this->Permit->settings['path'] = 'MockAuthTest.User';
 		$testRoute = array('rules' => array('auth' => false));
 		$this->assertTrue($this->Permit->_execute($testRoute));
 		$this->assertEqual($this->Permit->executed, $testRoute);
 	}
-	
+
 	function testNoUser() {
 		$this->Permit->settings['path'] = 'MockAuthTest.Member';
 		$this->Permit->settings['check'] = 'id';
-	
+
 		$testRoute = array('rules' => array('auth' => array('group' => 'member')));
 		$this->assertNull($this->Permit->executed);
 		$this->assertTrue($this->Permit->_execute($testRoute));
@@ -518,7 +518,7 @@ class PermitTest extends CakeTestCase {
 		$this->assertTrue($this->Controller->Permit->_execute($testRoute));
 		$this->assertEqual($this->Controller->Permit->executed, $testRoute);
 
-		# test for passing multiple values in a field - default behavior should be 'and' 
+		# test for passing multiple values in a field - default behavior should be 'and'
 		$testRoute = array('rules' => array('auth' => array('Group.name' => array('something-else', 'something-else-2'))));
 		$this->assertTrue($this->Controller->Permit->_execute($testRoute));
 		$this->assertEqual($this->Controller->Permit->executed, $testRoute);
@@ -533,6 +533,37 @@ class PermitTest extends CakeTestCase {
 		$this->assertEqual($this->Controller->Permit->executed, $testRoute);
 
 		# test for passing multiple values in a field - using 'or' option
+		$testRoute = array('rules' => array(
+			'auth' => array('Group.name' => array(
+				'or' => array('something-else', 'something-else-2')
+			)),
+		));
+		$this->assertTrue($this->Controller->Permit->_execute($testRoute));
+		$this->assertEqual($this->Controller->Permit->executed, $testRoute);
+		$testRoute = array('rules' => array(
+			'auth' => array('Group.name' => array(
+				'or'  => array('admin', 'something-else-2')
+			)),
+		));
+		$this->assertFalse($this->Controller->Permit->_execute($testRoute));
+		$this->assertEqual($this->Controller->Permit->executed, $testRoute);
+		$testRoute = array('rules' => array(
+			'auth' => array('Group.name' => array(
+				'or'  => array('something-else', 'editors')
+			)),
+		));
+		$this->assertFalse($this->Controller->Permit->_execute($testRoute));
+		$this->assertEqual($this->Controller->Permit->executed, $testRoute);
+		$testRoute = array('rules' => array(
+			'auth' => array('Group.name' => array(
+				'or'  => array('admin', 'editors')
+			)),
+		));
+		$this->assertFalse($this->Controller->Permit->_execute($testRoute));
+		$this->assertEqual($this->Controller->Permit->executed, $testRoute);
+
+		# test for passing multiple values in a field
+		# using deprecated fields_behavior 'or' option
 		$testRoute = array('rules' => array(
 			'auth' => array('Group.name' => array('something-else', 'something-else-2')),
 			'fields_behavior' => 'or'
