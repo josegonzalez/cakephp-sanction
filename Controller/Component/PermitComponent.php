@@ -8,7 +8,7 @@ App::uses('Set', 'Utility');
  * Exception class for Permit Component.  This exception will be thrown from Permit
  * component when it encounters an error.
  *
- * @package       Sanction.Controller.Components
+ * @package       Sanction.Controller.Component
  */
 class PermitException extends CakeException { }
 
@@ -18,7 +18,7 @@ class PermitException extends CakeException { }
  * Manages user access to a given route
  *
  * @package       Sanction
- * @subpackage    Sanction.Controller.Components
+ * @subpackage    Sanction.Controller.Component
  */
 class PermitComponent extends Component {
 
@@ -344,8 +344,8 @@ class PermitComponent extends Component {
  *
  * Connects routes for a given request
  *
- * @package       sanction
- * @subpackage    sanction.controller.components
+ * @package       Sanction
+ * @subpackage    Sanction.Controller.Component
  */
 class Permit extends Object {
 
