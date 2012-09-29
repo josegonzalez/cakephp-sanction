@@ -24,8 +24,8 @@ App::uses('Controller', 'Controller');
 /**
 * TestAuthComponent class
 *
-* @package       cake
-* @subpackage    cake.tests.cases.libs.controller.components
+* @package       Sanction
+* @subpackage    Sanction.Test.Case.Controller.Component
 */
 class TestPermitComponent extends PermitComponent {
 
@@ -59,8 +59,8 @@ class TestPermitComponent extends PermitComponent {
 /**
 * PermitTestController class
 *
-* @package       cake
-* @subpackage    cake.tests.cases.libs.controller.components
+* @package       Sanction
+* @subpackage    Sanction.Test.Case.Controller.Component
 */
 class PermitTestController extends Controller {
 
@@ -205,8 +205,8 @@ class PermitTestController extends Controller {
 /**
 * PermitTest class
 *
-* @package       cake
-* @subpackage    cake.tests.cases.libs.controller.components
+* @package       Sanction
+* @subpackage    Sanction.Test.Case.Controller.Component
 */
 class PermitTest extends CakeTestCase {
 
@@ -324,7 +324,7 @@ class PermitTest extends CakeTestCase {
 		$collection = new ComponentCollection();
 		$collection->init($this->Controller);
 
-    $this->setExpectedException('PHPUnit_Framework_Error_Notice');
+    $this->setExpectedException('PermitException');
 		$testPermit = new TestPermitComponent($collection, array(
 			'path' => 'MockAuthTest',
 			'check' => 'id',
