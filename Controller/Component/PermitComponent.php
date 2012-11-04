@@ -143,12 +143,7 @@ class PermitComponent extends Component {
 				break;
 			}
 
-			$url = Router::normalize($this->request->params);
-			if (!empty($this->request->query)) {
-				$url .= Router::queryString($this->request->query, array());
-			}
-
-			$this->Session->write('Sanction.referer', $url);
+			$this->Session->write('Sanction.referer', $this->request->here());
 			return $this->redirect($controller, $route);
 		}
 	}
