@@ -60,7 +60,8 @@
 	 * @param array $query Array of Query parameters.
 	 * @return array Modified query
 	 */
-		public function beforeFind(Model $model, $query) {
+		public function beforeFind(Model $Model, $query) {
+			$query = parent::beforeFind($Model, $query);
 			$this->settings[$Model->alias] = $this->modelDefaults[$Model->alias];
 
 			if (isset($query['permit']) && isset($this->settings[$Model->alias]['rules'][$query['permit']])) {
@@ -92,7 +93,7 @@
 	 * @throws UnauthorizedException
 	 */
 		public function afterFind(Model $Model, $results, $primary) {
-			$results = parent::afterFind($results, $primary);
+			$results = parent::afterFind($Model, $results, $primary);
 
 			if (!$primary) {
 				return $results;
