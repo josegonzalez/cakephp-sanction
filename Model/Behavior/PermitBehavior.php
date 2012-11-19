@@ -27,7 +27,7 @@
 	 * - value: (mixed, optional) The value the check should resolve to. DEFAULTS TO: true
 	 * - field: (string, optional) A `Hash::get()`-compatible string for retrieving the
 	 *   from the current record user_id.  DEFAULTS TO: %ModelAlias%.user_id
-	 * - skip: (boolean, optional) Whether to skip rule checking. DEFAULTS TO: false
+	 * - skip: (boolean, optional) Whether to skip rule checking. DEFAULTS TO: true
 	 * - rules: (array, optional) If `permit` is set in a `Model::find()`, this key will
 	 *   be used to make an index lookup for rules to apply to this find. DEFAULTS TO: empty array
 	 *
@@ -44,7 +44,7 @@
 					'check' => false,
 					'value' => true,
 					'field' => $Model->alias . 'user_id',
-					'skip'  => false,
+					'skip'  => true,
 					'rules' => array(),
 				);
 			}
