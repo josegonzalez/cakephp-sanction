@@ -43,7 +43,7 @@
 					),
 					'check' => false,
 					'value' => true,
-					'field' => $Model->alias . 'user_id',
+					'field' => $Model->alias . '.user_id',
 					'skip'  => true,
 					'rules' => array(),
 				);
