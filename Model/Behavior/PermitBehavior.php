@@ -73,8 +73,8 @@
 			}
 
 			foreach (array('check', 'skip', 'value') as $key) {
-				if (isset($query['permit_' . $key])) {
-					$this->settings[$Model->alias][$key] = $query['permit_' . $key];
+				if (isset($query[$key])) {
+					$this->settings[$Model->alias][$key] = $query[$key];
 				}
 			}
 
