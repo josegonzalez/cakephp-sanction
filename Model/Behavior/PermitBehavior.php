@@ -113,7 +113,7 @@
 
 			$adminCheck = $settings['check'];
 			$adminValue = $settings['value'];
-			if ($adminCheck && $this->user($Model, $adminCheck, $results) == $adminValue) {
+			if ($adminCheck && $this->user($Model, $results, $adminCheck) == $adminValue) {
 				return $results;
 			}
 
@@ -125,11 +125,11 @@
 	 *
 	 * Can be overriden in the Model to provide advanced control
 	 *
-	 * @param string $key field to retrieve.  Leave null to get entire User record
 	 * @param array $result single Model record being authenticated against
+	 * @param string $key field to retrieve.  Leave null to get entire User record
 	 * @return mixed User record. or null if no user is logged in.
 	 */
-		public function user(Model $Model, $key = null, $result = array()) {
+		public function user(Model $Model, $result, $key = null) {
 			if (method_exists($Model, 'user')) {
 				return $Model->user($key, $result);
 			}
@@ -145,7 +145,7 @@
 			if (method_exists($Model, 'get')) {
 				$className = get_class($Model);
 				$ref = new ReflectionMethod($className, 'get');
-				if ($refl->isStatic()) {
+				if ($ref->isStatic()) {
 					return $className::get($key);
 				}
 			}
