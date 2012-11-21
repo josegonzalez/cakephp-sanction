@@ -102,6 +102,11 @@
 				return $results;
 			}
 
+			// the permit behavour is a bit pointless if we're handing more than one result
+			if (count($results) > 1) {
+				return $results;
+			}
+
 			$user_id = Hash::get($results, "{$settings['field']}");
 			if ($user_id === null) {
 				return $results;
