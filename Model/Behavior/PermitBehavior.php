@@ -102,7 +102,8 @@
 				return $results;
 			}
 
-			$user_id = Hash::get($results, "{$settings['field']}");
+			// the `0.` in the line below might be a little hacky, but it works...
+			$user_id = Hash::get($results, "0.{$settings['field']}");
 			if ($user_id === null) {
 				return $results;
 			}
