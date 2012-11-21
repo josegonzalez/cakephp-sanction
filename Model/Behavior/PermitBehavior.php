@@ -49,6 +49,7 @@
 				);
 			}
 			$this->settings[$Model->alias] = array_merge($this->settings[$Model->alias], $settings);
+			$this->modelDefaults[$Model->alias] = $this->settings[$Model->alias];
 		}
 
 
@@ -60,6 +61,16 @@
 	 * @return array Modified query
 	 */
 		public function beforeFind(Model $Model, $query) {
+			$this->settings[$Model->alias] = $this->modelDefaults[$Model->alias];
+
+			// check if $this->modelDefaultsPersist has been set
+			if (isset($this->modelDefaultsPersist[$Model->alias])) {
+				// if persist equals equals true
+				if (!isset($this->modelDefaults[$Model->alias]['persist']) || $this->modelDefaults[$Model->alias]['persist'] == false) {
+					$this->modelDefaults[$Model->alias] = $this->modelDefaultsPersist[$Model->alias];
+				}
+			}
+
 			if (isset($query['permit']) && isset($this->settings[$Model->alias]['rules'][$query['permit']])) {
 				$rules = $this->settings[$Model->alias]['rules'][$query['permit']];
 				if (isset($rules['rules'])) {
@@ -99,7 +110,13 @@
 				return $results;
 			}
 
-			$user_id = Hash::get($results, "{$settings['field']}");
+			// the permit behavour is a bit pointless if we're handing more than one result
+			if (count($results) > 1) {
+				return $results;
+			}
+
+			// HACK: Retrieve the zeroth index in the resultset
+			$user_id = Hash::get($results, "0.{$settings['field']}");
 			if ($user_id === null) {
 				return $results;
 			}
@@ -153,11 +170,14 @@
 	/**
 	 * Used to dynamically assign permit settings
 	 *
-	 * @param array $settings same as the settings used to set-up the model
+	 * @param array $settings same as the settings used to set-up the model, with the addition of 'persist' (boolean), which will keep the passed settings for all future model calls
 	 * @return void
 	 */
 		public function permit(Model $Model, $settings = array()) {
-			$this->settings[$Model->alias] = array_merge($this->settings[$Model->alias], $settings);
+			// store existing model defaults
+			$this->modelDefaultsPersist[$Model->alias] = $this->modelDefaults[$Model->alias];
+			// assign new settings
+			$this->modelDefaults[$Model->alias] = array_merge($this->modelDefaults[$Model->alias], $settings);
 		}
 
 	}
