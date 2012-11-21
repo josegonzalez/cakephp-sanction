@@ -49,7 +49,6 @@
 				);
 			}
 			$this->settings[$Model->alias] = array_merge($this->settings[$Model->alias], $settings);
-			$this->modelDefaults[$Model->alias] = $this->settings[$Model->alias];
 		}
 
 
@@ -61,8 +60,6 @@
 	 * @return array Modified query
 	 */
 		public function beforeFind(Model $Model, $query) {
-			$this->settings[$Model->alias] = $this->modelDefaults[$Model->alias];
-
 			if (isset($query['permit']) && isset($this->settings[$Model->alias]['rules'][$query['permit']])) {
 				$rules = $this->settings[$Model->alias]['rules'][$query['permit']];
 				if (isset($rules['rules'])) {
@@ -151,6 +148,16 @@
 			}
 
 			return false;
+		}
+
+	/**
+	 * Used to dynamically assign permit settings
+	 *
+	 * @param array $settings same as the settings used to set-up the model
+	 * @return void
+	 */
+		public function permit(Model $Model, $settings = array()) {
+			$this->settings[$Model->alias] = array_merge($this->settings[$Model->alias], $settings);
 		}
 
 	}
