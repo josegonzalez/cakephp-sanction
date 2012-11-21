@@ -102,7 +102,12 @@
 				return $results;
 			}
 
-			// the `0.` in the line below might be a little hacky, but it works...
+			// the permit behavour is a bit pointless if we're handing more than one result
+			if (count($results) > 1) {
+				return $results;
+			}
+
+			// HACK: Retrieve the zeroth index in the resultset
 			$user_id = Hash::get($results, "0.{$settings['field']}");
 			if ($user_id === null) {
 				return $results;
