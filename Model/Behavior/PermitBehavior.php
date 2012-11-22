@@ -72,7 +72,7 @@
 				$this->settings[$Model->alias] = array_merge($this->settings[$Model->alias], $rules);
 			}
 
-			foreach (array('check', 'skip', 'value') as $key) {
+			foreach (array('message', 'check', 'value', 'field', 'skip', 'rules') as $key) {
 				if (isset($query['permit_' . $key])) {
 					$this->settings[$Model->alias][$key] = $query['permit_' . $key];
 				}
