@@ -63,6 +63,14 @@
 		public function beforeFind(Model $Model, $query) {
 			$this->settings[$Model->alias] = $this->modelDefaults[$Model->alias];
 
+			// check if $this->modelDefaultsPersist has been set
+			if (isset($this->modelDefaultsPersist[$Model->alias])) {
+				// if persist equals equals true
+				if (!isset($this->modelDefaults[$Model->alias]['persist']) || $this->modelDefaults[$Model->alias]['persist'] == false) {
+					$this->modelDefaults[$Model->alias] = $this->modelDefaultsPersist[$Model->alias];
+				}
+			}
+
 			if (isset($query['permit']) && isset($this->settings[$Model->alias]['rules'][$query['permit']])) {
 				$rules = $this->settings[$Model->alias]['rules'][$query['permit']];
 				if (isset($rules['rules'])) {
@@ -157,6 +165,19 @@
 			}
 
 			return false;
+		}
+
+	/**
+	 * Used to dynamically assign permit settings
+	 *
+	 * @param array $settings same as the settings used to set-up the model, with the addition of 'persist' (boolean), which will keep the passed settings for all future model calls
+	 * @return void
+	 */
+		public function permit(Model $Model, $settings = array()) {
+			// store existing model defaults
+			$this->modelDefaultsPersist[$Model->alias] = $this->modelDefaults[$Model->alias];
+			// assign new settings
+			$this->modelDefaults[$Model->alias] = array_merge($this->modelDefaults[$Model->alias], $settings);
 		}
 
 	}
