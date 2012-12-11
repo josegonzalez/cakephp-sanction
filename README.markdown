@@ -284,6 +284,49 @@ Allowing access to multiple roles:
         )
     );
 
+### PermitBehavour Setup
+
+Sanction now contains a Behavour which allows you to deny access to records owned by other users, which was created primarally for limiting access to the `edit()` action. It does this by checking the specified field (default of `user_id`) within the current model against the id of the currently logged in user, and throws an `UnauthorizedException` if they don't match.
+
+To enable this, add one of the following to your models:
+
+	// default set-up
+	public $actsAs = array(
+		'Sanction.Permit'
+	);
+
+	// example set-up with all available options, set your own defaults
+	public $actsAs = array(
+		'Sanction.Permit' => array(
+			'message' => 'You do not have permission to edit this post', // (string, optional) A message to display to the user when they do not have access to the model record. DEFAULTS TO: "You do not have permission to view this %ModelAlias%"
+			'field' => 'Post.user_id', // (string, optional) A `Hash::get()`-compatible string for retrieving the from the current record user_id.  DEFAULTS TO: %ModelAlias%.user_id
+			'check' => 'is_admin', // (string, optional) optional admin override for returning the results when the user_id does not match the current user. DEFAULTS TO: false
+			'value' => true, // (mixed, optional) The value the check should resolve to. DEFAULTS TO: true
+			'skip' => true, // (boolean, optional) Whether to skip rule checking. DEFAULTS TO: true
+			'rules' => array(), (array, optional) If `permit` is set in a `Model::find()`, this key will be used to make an index lookup for rules to apply to this find. DEFAULTS TO: empty array
+		)
+	);
+
+If you want to add additional settings to individual data retrieval calls, there are a couple of ways you're able to do this:
+
+	// passing additional settings via a `find('first')`
+	$params = array(
+		'conditions' => array('id' => $id),
+		'permit_skip' => false,
+		'permit_check' => 'is_admin',
+		'permit_value' => true,
+	);
+	$data = $this->find('first', $params);
+
+	// using the `permit()` method on the model
+	$this->permit(array(
+		'skip' => false,
+		'check' => 'is_admin',
+		'value' => true,
+		'persist' => true // (boolean, optional) if set to true, all settings passed here will persist for future `find()` requests, unless false is set
+	));
+	$this->request->data = $this->read(null, $id);
+
 ## Todo
 
 * More Unit Tests
