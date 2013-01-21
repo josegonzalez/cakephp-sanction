@@ -1,4 +1,4 @@
-# Sanction Plugin for CakePHP
+# Sanction Plugin for CakePHP [![Build Status](https://travis-ci.org/josegonzalez/sanction.png?branch=master)](https://travis-ci.org/josegonzalez/sanction)
 
 Centralize all of those permissions in a single file using the Sanction plugin.
 
