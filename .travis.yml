@@ -1,7 +1,9 @@
 language: php
 
 php:
+  - 5.2
   - 5.3
+  - 5.4
 
 env:
   - CAKE_VERSION=2.1.5 DB=mysql
