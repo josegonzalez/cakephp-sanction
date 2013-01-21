@@ -36,4 +36,4 @@ before_script:
     }" > ./app/Config/database.php
 
 script:
-  - ./app/Console/cake test Sanction Controller/Component/Permit
+  - ./app/Console/cake test Sanction Controller/Component/Permit --stderr
