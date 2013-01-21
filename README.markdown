@@ -40,7 +40,7 @@ In your plugin directory type
 
 In 2.0 you need to enable the plugin your `app/Config/bootstrap.php` file:
 
-    CakePlugin::load('Sanction');
+		CakePlugin::load('Sanction');
 
 If you are already using `CakePlugin::loadAll();`, then this is not necessary.
 
@@ -143,8 +143,8 @@ Rules are defined by `Permit::access();` and can contain 3 arrays:
 
 * Array of rules upon which we will control access
 * Array of rules by which the User's session must be defined by
-  * If you restrict to a single model and don't use associated data, you can enter just the fieldname to match on in the Auth array
-  * If you use associated models, you need to specify a `Set::extract()` path as the fieldname
+	* If you restrict to a single model and don't use associated data, you can enter just the fieldname to match on in the Auth array
+	* If you use associated models, you need to specify a `Set::extract()` path as the fieldname
 * Array of extra parameters, such as where to redirect, the flash message, etc.
 
 An example `app/Config/permit.php`:
@@ -238,51 +238,51 @@ As with routes, all rules must be specified in order of most specific to least s
 	// ONLY declaration that Sanction uses. Once this fails,
 	// Sanction will not continue on to other rules
 	Permit::access(
-	    array('controller' => array('posts', 'categories', 'comments'),
-	    array('auth' => array('User.role' => array('admin'))),
-	    array('redirect' => array('controller' => 'users', 'action' => 'account')
+			array('controller' => array('posts', 'categories', 'comments'),
+			array('auth' => array('User.role' => array('admin'))),
+			array('redirect' => array('controller' => 'users', 'action' => 'account')
 	);
 
 	// So this declaration will be effectively useless.
 	Permit::access(
-	    array('controller' => array('posts'), 'action' => array('edit'),
-	    array('auth' => array('User.role' => array('manager', 'admin'))),
-	    array('redirect' => array('controller' => 'users', 'action' => 'account')
+			array('controller' => array('posts'), 'action' => array('edit'),
+			array('auth' => array('User.role' => array('manager', 'admin'))),
+			array('redirect' => array('controller' => 'users', 'action' => 'account')
 	);
 
 In order to specify the rules such that an admin user can edit posts, the rules would need to be switched. The most restrictive rule - i.e. the one that limits the controller AND action, as opposed to just the controller - should come first. The following will work as expected:
 
 	Permit::access(
-	    array('controller' => array('posts'), 'action' => array('edit'),
-	    array('auth' => array('User.role' => array('manager', 'admin'))),
-	    array('redirect' => array('controller' => 'users', 'action' => 'account')
+			array('controller' => array('posts'), 'action' => array('edit'),
+			array('auth' => array('User.role' => array('manager', 'admin'))),
+			array('redirect' => array('controller' => 'users', 'action' => 'account')
 	);
 
 	Permit::access(
-	    array('controller' => array('posts', 'configs', 'comments'),
-	    array('auth' => array('User.role' => array('admin'))),
-	    array('redirect' => array('controller' => 'users', 'action' => 'account')
+			array('controller' => array('posts', 'configs', 'comments'),
+			array('auth' => array('User.role' => array('admin'))),
+			array('redirect' => array('controller' => 'users', 'action' => 'account')
 	);
 
 #### Example Rules
 
 Allowing anonymous access:
 
-    Permit::access(
-        array('controller' => array('posts'), 'action' => array('index')),
-        array(),
-        array()
-    );
+	Permit::access(
+			array('controller' => array('posts'), 'action' => array('index')),
+			array(),
+			array()
+	);
 
 Allowing access to multiple roles:
 
-    Permit::access(
-        array('controller' => array('posts'), 'action' => array('add', 'delete')),
-        array('auth' => array('User.role' => array('user', 'admin'))),
-        array('redirect' => array('controller' => 'posts', 'action' => 'index'),
-              'message' => 'You are not authorized to perform the requested action.'
-        )
-    );
+	Permit::access(
+			array('controller' => array('posts'), 'action' => array('add', 'delete')),
+			array('auth' => array('User.role' => array('user', 'admin'))),
+			array('redirect' => array('controller' => 'posts', 'action' => 'index'),
+						'message' => 'You are not authorized to perform the requested action.'
+			)
+	);
 
 ### PermitBehavour Setup
 
