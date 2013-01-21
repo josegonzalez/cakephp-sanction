@@ -1,0 +1,11 @@
+{
+  "name": "josegonzalez/sanction",
+  "type": "cakephp-plugin",
+        "description": "Centralize all of those permissions in a single file using the Sanction plugin.",
+  "homepage": "http://github.com/josegonzalez/sanction",
+  "license": "MIT",
+  "require": {
+    "php": ">=5.3.0",
+    "composer/installers": "*"
+  }
+}
