@@ -110,8 +110,8 @@ class PermitTestController extends Controller {
  * @return void
  */
 	function __construct($request, $response) {
-		$request->addParams(Router::parse('/permit_test'));
-		$request->here = '/permit_test';
+		$request->addParams(Router::parse('/permit_tests'));
+		$request->here = '/permit_tests';
 		$request->webroot = '/';
 		Router::setRequestInfo($request);
 		parent::__construct($request, $response);
@@ -242,7 +242,7 @@ class PermitTest extends CakeTestCase {
 		$request = new CakeRequest(null, false);
 		$request->params = array(
 			'pass' => array(),  'named' => array(),
-			'plugin' => '', 'controller' => 'Posts',
+			'plugin' => '', 'controller' => 'PermitTests',
 			'action' => 'index'
 		);
 		$this->Controller = new PermitTestController($request, $this->getMock('CakeResponse'));
@@ -350,16 +350,16 @@ class PermitTest extends CakeTestCase {
 		$testRoute = array();
 		$this->assertFalse($this->Permit->_parse($testRoute));
 
-		$testRoute = array('controller' => 'posts');
+		$testRoute = array('controller' => 'permit_tests');
 		$this->assertTrue($this->Permit->_parse($testRoute));
 
-		$testRoute = array('controller' => 'posts', 'action' => 'index');
+		$testRoute = array('controller' => 'permit_tests', 'action' => 'index');
 		$this->assertTrue($this->Permit->_parse($testRoute));
 
-		$testRoute = array('plugin' => null, 'controller' => 'posts', 'action' => 'index');
+		$testRoute = array('plugin' => null, 'controller' => 'permit_tests', 'action' => 'index');
 		$this->assertTrue($this->Permit->_parse($testRoute));
 
-		$testRoute = array('controller' => 'posts', 'action' => 'add');
+		$testRoute = array('controller' => 'permit_tests', 'action' => 'add');
 		$this->assertFalse($this->Permit->_parse($testRoute));
 
 		$testRoute = array('controller' => 'users', 'action' => 'index');
@@ -367,38 +367,39 @@ class PermitTest extends CakeTestCase {
 	}
 
 	function testMultipleParse() {
-		$testRoute = array('controller' => 'posts', 'action' => array('index'));
+		$testRoute = array('controller' => 'permit_tests', 'action' => array('index'));
 		$this->assertTrue($this->Permit->_parse($testRoute));
 
-		$testRoute = array('controller' => 'posts', 'action' => array('index', 'add'));
+		$testRoute = array('controller' => 'permit_tests', 'action' => array('index', 'add'));
 		$this->assertTrue($this->Permit->_parse($testRoute));
 
-		$testRoute = array('controller' => array('posts', 'users'), 'action' => array('index', 'add'));
+		$testRoute = array('controller' => array('permit_tests', 'users'), 'action' => array('index', 'add'));
 		$this->assertTrue($this->Permit->_parse($testRoute));
 
-		$testRoute = array('plugin' => array(null, 'blog'),
-			'controller' => array('posts', 'users'),
+		$testRoute = array(
+			'plugin' => array(null, 'blog'),
+			'controller' => array('permit_tests', 'users'),
 			'action' => array('index', 'add')
 		);
 		$this->assertTrue($this->Permit->_parse($testRoute));
 
-		$testRoute = array('controller' => 'posts', 'action' => array('add', 'edit', 'delete'));
+		$testRoute = array('controller' => 'permit_tests', 'action' => array('add', 'edit', 'delete'));
 		$this->assertFalse($this->Permit->_parse($testRoute));
 	}
 
 	function testCaseAndInflectionParse() {
-		$testRoute = array('controller' => 'POSTS');
+		$testRoute = array('controller' => 'PERMIT_TESTS');
 		$this->assertTrue($this->Permit->_parse($testRoute));
 
 		$this->Controller->params = $this->Permit->_requestParams = array(
 			'pass' => array(),  'named' => array(),
-			'plugin' => '', 'controller' => 'blog_posts',
+			'plugin' => '', 'controller' => 'blog_permit_tests',
 			'action' => 'INDEX'
 		);
-		$testRoute = array('controller' => 'POSTS');
+		$testRoute = array('controller' => 'PERMIT_TESTS');
 		$this->assertFalse($this->Permit->_parse($testRoute));
 
-		$testRoute = array('controller' => 'Blog_POSTS');
+		$testRoute = array('controller' => 'Blog_PERMIT_TESTS');
 		$this->assertTrue($this->Permit->_parse($testRoute));
 
 		$testRoute = array('action' => 'inDex');
@@ -649,7 +650,7 @@ class PermitTest extends CakeTestCase {
 		$this->Permit->settings['isTest'] = false;
 
 		$this->Permit->access(
-			array('controller' => 'posts', 'action' => array('add', 'edit', 'delete')),
+			array('controller' => 'permit_tests', 'action' => array('add', 'edit', 'delete')),
 			array('auth' => true),
 			array('redirect' => array('controller' => 'users', 'action' => 'login'))
 		);
@@ -668,7 +669,7 @@ class PermitTest extends CakeTestCase {
 		$this->assertNull($this->Controller->testUrl);
 
 		$this->Permit->access(
-			array('controller' => 'posts', 'action' => 'index'),
+			array('controller' => 'permit_tests', 'action' => 'index'),
 			array('auth' => true),
 			array('redirect' => array('controller' => 'users', 'action' => 'login'))
 		);
@@ -678,12 +679,12 @@ class PermitTest extends CakeTestCase {
 
 		$this->Controller->params = $this->Permit->_requestParams = array(
 			'pass' => array(),  'named' => array(),
-			'plugin' => '', 'controller' => 'blog_posts',
+			'plugin' => '', 'controller' => 'blog_permit_tests',
 			'action' => 'index'
 		);
 		$this->Permit->startup($this->Controller);
 		$this->Permit->access(
-			array('controller' => 'blogPosts', 'action' => 'index'),
+			array('controller' => 'blogPermitTests', 'action' => 'index'),
 			array('auth' => true),
 			array('redirect' => array('controller' => 'users', 'action' => 'login'))
 		);
@@ -694,7 +695,7 @@ class PermitTest extends CakeTestCase {
 	function testAccess() {
 		$this->assertEqual(count($this->Permit->routes), 0);
 		$this->Permit->access(
-			array('controller' => 'posts', 'action' => array('add', 'edit', 'delete')),
+			array('controller' => 'permit_tests', 'action' => array('add', 'edit', 'delete')),
 			array('auth' => array('group' => 'admin')),
 			array('redirect' => array('controller' => 'users', 'action' => 'login'))
 		);
@@ -711,7 +712,7 @@ class PermitTest extends CakeTestCase {
 		$this->assertEqual(count($this->Permit->routes), 2);
 
 		$expected = array(
-			'route' => array('controller' => 'posts', 'action' => array('add', 'edit', 'delete')),
+			'route' => array('controller' => 'permit_tests', 'action' => array('add', 'edit', 'delete')),
 			'rules' => array('auth' => array('group' => 'admin')),
 			'redirect' => array('controller' => 'users', 'action' => 'login'),
 			'message' => __('Access denied', true),
@@ -741,7 +742,7 @@ class PermitTest extends CakeTestCase {
 
 		# test bool, is logged in
 		$testRoute = array(
-			'route' => array('controller' => 'posts', 'action' => array('add', 'edit', 'delete')),
+			'route' => array('controller' => 'permit_tests', 'action' => array('add', 'edit', 'delete')),
 			'rules' => array('auth' => array('group' => 'admin')),
 			'redirect' => array('controller' => 'users', 'action' => 'login'),
 			'message' => __('Access denied', true),
@@ -779,14 +780,14 @@ class PermitTest extends CakeTestCase {
 		$this->assertEqual(count(Permit::$routes), 0);
 
 		Permit::access(
-			array('controller' => array('posts', 'tags'), 'action' => array('add', 'edit', 'delete')),
+			array('controller' => array('permit_tests', 'tags'), 'action' => array('add', 'edit', 'delete')),
 			array('auth' => array('group' => 'admin')),
 			array('redirect' => array('controller' => 'users', 'action' => 'login'))
 		);
 		$this->assertEqual(count(Permit::$routes), 1);
 
 		Permit::access(
-			array('controller' => 'posts', 'action' => array('add', 'edit', 'delete')),
+			array('controller' => 'permit_tests', 'action' => array('add', 'edit', 'delete')),
 			array('auth' => array('group' => 'admin')),
 			array('redirect' => array('controller' => 'users', 'action' => 'login'))
 		);
@@ -803,7 +804,7 @@ class PermitTest extends CakeTestCase {
 		$this->assertEqual(count(Permit::$routes), 3);
 
 		$expected = array(
-			'route' => array('controller' => array('posts', 'tags'), 'action' => array('add', 'edit', 'delete')),
+			'route' => array('controller' => array('permit_tests', 'tags'), 'action' => array('add', 'edit', 'delete')),
 			'rules' => array('auth' => array('group' => 'admin')),
 			'redirect' => array('controller' => 'users', 'action' => 'login'),
 			'message' => __('Access denied', true),
