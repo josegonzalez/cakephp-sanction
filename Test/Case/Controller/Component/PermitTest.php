@@ -242,7 +242,7 @@ class PermitTest extends CakeTestCase {
 		$request = new CakeRequest(null, false);
 		$request->params = array(
 			'pass' => array(),  'named' => array(),
-			'plugin' => '', 'controller' => 'PermitTests',
+			'plugin' => '', 'controller' => 'permit_tests',
 			'action' => 'index'
 		);
 		$this->Controller = new PermitTestController($request, $this->getMock('CakeResponse'));
