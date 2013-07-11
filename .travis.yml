@@ -9,7 +9,6 @@ env:
   - CAKE_VERSION="tags/2.3.7" DB=mysql
   - CAKE_VERSION="tags/2.2.8" DB=mysql
   - CAKE_VERSION="tags/2.1.5" DB=mysql
-  - CAKE_VERSION="tags/2.0.6" DB=mysql
 
 before_script:
   - sh -c "if [ '$DB' = 'mysql' ]; then mysql -e 'CREATE DATABASE cakephp_test;'; fi"
