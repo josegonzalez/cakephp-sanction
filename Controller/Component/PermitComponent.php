@@ -167,7 +167,9 @@ class PermitComponent extends Component {
 				$values = (array) $value;
 				$check = (array) $this->request->params[$key];
 
-				if (count($values) != count(array_filter($values)) && (in_array(null, $check) || count($check) == 0)) {
+				$hasNullValues = (count($values) != count(array_filter($values)) || count($values) == 0);
+				$currentValueIsNullish = (in_array(null, $check) || in_array('', $check) || count($check) == 0);
+				if ($hasNullValues && $currentValueIsNullish) {
 					$count--;
 					continue;
 				}
