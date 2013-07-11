@@ -163,11 +163,11 @@ class PermitComponent extends Component {
 		}
 
 		foreach ($route as $key => $value) {
-			if (isset($this->request->params[$key])) {
+			if (array_key_exists($key, $this->request->params)) {
 				$values = (array) $value;
 				$check = (array) $this->request->params[$key];
 
-				if (!count($values) && in_array(null, $check)) {
+				if (count($values) != count(array_filter($values)) && (in_array(null, $check) || count($check) == 0)) {
 					$count--;
 					continue;
 				}
@@ -182,10 +182,16 @@ class PermitComponent extends Component {
 					}
 				}
 
-				foreach ($values as $k => $v) {
-					if (in_array(strtolower($v), $check)) {
-						$count--;
+
+				if (count($values) > 0) {
+					foreach ($values as $k => $v) {
+						if (in_array(strtolower($v), $check)) {
+							$count--;
+							break;
+						}
 					}
+				} elseif (count($check) === 0) {
+					$count--;
 				}
 			}
 		}
