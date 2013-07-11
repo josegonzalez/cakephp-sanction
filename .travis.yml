@@ -13,7 +13,7 @@ env:
 
 before_script:
   - sh -c "if [ '$DB' = 'mysql' ]; then mysql -e 'CREATE DATABASE cakephp_test;'; fi"
-  - git clone --depth 1 git://github.com/cakephp/cakephp ../cakephp && cd ../cakephp && git checkout $CAKE_VERSION
+  - git clone --depth 1 git://github.com/cakephp/cakephp ../cakephp && cd ../cakephp && git fetch --tags && git checkout $CAKE_VERSION
   - cp -R ../sanction app/Plugin/Sanction
   - echo "<?php
     class DATABASE_CONFIG {
