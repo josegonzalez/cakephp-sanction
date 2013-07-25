@@ -174,7 +174,8 @@ class PermitComponent extends Component {
 
 			$url = parse_url($route);
 			$_path = rtrim($url['path'], '/');
-			if ($_path . '?' . Hash::get($url, 'query') === $this->_here_query) {
+			$_query = isset($url['query']) ? $url['query'] : '';
+			if ($_path . '?' . $_query === $this->_here_query) {
 				return true;
 			}
 
