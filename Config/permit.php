@@ -14,5 +14,3 @@ Permit::access(
 	array('auth' => array('group' => 'admin')),
 	array('redirect' => array('controller' => 'users', 'action' => 'login')));
 */
-
-?>
