@@ -148,6 +148,18 @@ class PermitComponent extends Component {
 		}
 	}
 
+	function _ensureHere() {
+		if (empty($this->_here) || empty($this->_here_query)) {
+			$this->_here = rtrim(preg_replace(
+				'/^' . preg_quote($this->request->base, '/') . '/',
+				'',
+				$this->request->here,
+				1
+			), '/');
+			$this->_here_query = rtrim($this->request->here(false), '/');
+		}
+	}
+
 /**
  * Parses a given Permit route to see if it matches the current request
  *
@@ -157,6 +169,22 @@ class PermitComponent extends Component {
  * @access protected
  */
 	function _parse($route) {
+		if (is_string($route)) {
+			$this->_ensureHere();
+
+			$url = parse_url($route);
+			$_path = rtrim($url['path'], '/');
+			if ($_path . '?' . Hash::get($url, 'query') === $this->_here_query) {
+				return true;
+			}
+
+			if ($_path === $this->_here) {
+				return true;
+			}
+
+			return false;
+		}
+
 		$count = count($route);
 		if ($count == 0) {
 			return false;
@@ -379,25 +407,27 @@ class Permit extends Object {
 			$redirect
 		);
 
-		foreach (array('controller', 'plugin') as $inflected) {
-			if (isset($route[$inflected])) {
-				if (is_array($route[$inflected])) {
-					foreach ($route[$inflected] as $i => $controllerName) {
-						$route[$inflected][$i] = Inflector::underscore($controllerName);
+		if (is_array($route)) {
+			foreach (array('controller', 'plugin') as $inflected) {
+				if (isset($route[$inflected])) {
+					if (is_array($route[$inflected])) {
+						foreach ($route[$inflected] as $i => $controllerName) {
+							$route[$inflected][$i] = Inflector::underscore($controllerName);
+						}
+					} else {
+						$route[$inflected] = Inflector::underscore($route[$inflected]);
 					}
-				} else {
-					$route[$inflected] = Inflector::underscore($route[$inflected]);
 				}
 			}
-		}
 
-		foreach ($route as $k => $value) {
-			if (is_array($value)) {
-				foreach ($value as $i => $_value) {
-					$route[$k][$i] = strtolower($_value);
+			foreach ($route as $k => $value) {
+				if (is_array($value)) {
+					foreach ($value as $i => $_value) {
+						$route[$k][$i] = strtolower($_value);
+					}
+				} else {
+					$route[$k] = strtolower($value);
 				}
-			} else {
-				$route[$k] = strtolower($value);
 			}
 		}
 

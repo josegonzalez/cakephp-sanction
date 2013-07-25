@@ -141,7 +141,7 @@ In the future, it will also keep a history of past requests, as well as highligh
 
 Rules are defined by `Permit::access();` and can contain 3 arrays:
 
-* Array of rules upon which we will control access
+* Array of rules upon which we will control access. It can be a string, but these are much less flexible.
 * Array of rules by which the User's session must be defined by
 	* If you restrict to a single model and don't use associated data, you can enter just the fieldname to match on in the Auth array
 	* If you use associated models, you need to specify a `Set::extract()` path as the fieldname
@@ -229,6 +229,31 @@ The user must authenticated, and if they are not, they will be redirected to `/u
 For the above, any route with an admin prefix would be affected.
 
 The user must be in the group `admin`, and if they are not, they will be redirected to `/users/login`.
+
+It is also possible to use strings to reference URLs instead of routes:
+
+		App::uses('Permit', 'Sanction.Controller/Component');
+
+		Permit::access(
+			'/posts',
+			array('auth' => array('group' => 'admin')),
+			array('redirect' => array('controller' => 'users', 'action' => 'login'))
+		);
+
+The above rule will affect ONLY requests to `/posts` and `/posts/`; Requests to `/posts/index` or `/posts/add`  will remain untouched. Trailing commas are removed from rules for normalization purposes.
+
+You can also specify query strings, though again, it is a literal match:
+
+
+		App::uses('Permit', 'Sanction.Controller/Component');
+
+		Permit::access(
+			'/posts?page=5',
+			array('auth' => array('group' => 'admin')),
+			array('redirect' => array('controller' => 'users', 'action' => 'login'))
+		);
+
+The above would affect only `/posts?page=5`, and requests to `/posts?page=6` or `/posts?page=5&order=created` would be ignored in rule parsing. Please keep this in mind when using string-based permission access.
 
 #### Rules Specificity
 

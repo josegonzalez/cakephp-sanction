@@ -366,6 +366,23 @@ class PermitTest extends CakeTestCase {
 		$this->assertFalse($this->Permit->_parse($testRoute));
 	}
 
+	function testSingleStringParse() {
+		$testRoute = array();
+		$this->assertFalse($this->Permit->_parse($testRoute));
+
+		$testRoute = '/permit_tests';
+		$this->assertTrue($this->Permit->_parse($testRoute));
+
+		$testRoute = '/permit_tests/index';
+		$this->assertFalse($this->Permit->_parse($testRoute));
+
+		$testRoute = '/permit_tests/add';
+		$this->assertFalse($this->Permit->_parse($testRoute));
+
+		$testRoute = '/users/index';
+		$this->assertFalse($this->Permit->_parse($testRoute));
+	}
+
 	function testMultipleParse() {
 		$testRoute = array('controller' => 'permit_tests', 'action' => array('index'));
 		$this->assertTrue($this->Permit->_parse($testRoute));
