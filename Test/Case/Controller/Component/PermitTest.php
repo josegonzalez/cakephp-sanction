@@ -417,6 +417,20 @@ class PermitTest extends CakeTestCase {
 		$this->assertTrue($this->protectedMethodCall($this->Permit, '_parse', array($testRoute)));
 	}
 
+	public function testNumberIndex() {
+		$this->Controller->params = $this->Permit->_requestParams = array(
+			'controller' => 'pages',
+			'action' => 'display',
+			'home'
+		);
+		$testRoute = array(
+			'controller' => 'pages',
+			'action' => 'display',
+			(int) 0 => 'home'
+		);
+		$this->assertTrue($this->protectedMethodCall($this->Permit, '_parse', array($testRoute)));
+	}
+
 	public function testDenyAccess() {
 		$this->Controller->Permit->settings['path'] = 'MockAuthTest.User';
 		$this->Controller->Permit->settings['check'] = 'id';

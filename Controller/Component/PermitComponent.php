@@ -166,8 +166,7 @@ class PermitComponent extends Component {
 
 			$url = parse_url($route);
 			$_path = rtrim($url['path'], '/');
-			$_query = isset($url['query']) ? $url['query'] : '';
-			if ($_path . '?' . $_query === $this->_hereQuery) {
+			if ($_path . '?' . Hash::get($url, 'query') === $this->_here_query) {
 				return true;
 			}
 
@@ -214,6 +213,12 @@ class PermitComponent extends Component {
 					}
 				} elseif (count($check) === 0) {
 					$count--;
+				}
+			} elseif (is_numeric($key) && isset($this->request->params['pass'])) {
+				if (is_array($this->request->params['pass'])) {
+					if (Hash::contains($this->request->params['pass'], $value)) {
+						$count--;
+					}
 				}
 			}
 		}
