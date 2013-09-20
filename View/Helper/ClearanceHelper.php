@@ -23,11 +23,11 @@
  * @subpackage    sanction.view.helpers
  */
 class ClearanceHelper extends AppHelper {
+
 /**
  * Helper dependencies
  *
  * @var array
- * @access public
  */
 	public $helpers = array('Html', 'Session');
 
@@ -35,10 +35,8 @@ class ClearanceHelper extends AppHelper {
  * Array of routes connected with Permit::access()
  *
  * @var array
- * @access public
  */
 	public $routes = array();
-
 
 /**
  * Holds the options for the ClearanceHelper
@@ -46,10 +44,9 @@ class ClearanceHelper extends AppHelper {
  * The values that may be specified are:
  *  - `$options['path']` Path to the User's Session (First 2 keys)
  * @var array
- * @access public
  */
 	public $settings = array(
-		'path'  => 'Auth.User',
+		'path' => 'Auth.User',
 		'check' => 'id',
 	);
 
@@ -60,7 +57,7 @@ class ClearanceHelper extends AppHelper {
  * @param array $settings Configuration settings for the helper.
  */
 	public function __construct(View $View, $settings = array()) {
-		$this->settings = array_merge($this->settings, (array) $settings);
+		$this->settings = array_merge($this->settings, (array)$settings);
 		parent::__construct($View, $settings);
 	}
 
@@ -83,33 +80,42 @@ class ClearanceHelper extends AppHelper {
  * @param array $options Array of HTML attributes.
  * @param string $confirmMessage JavaScript confirmation message.
  * @return string An `<a />` element.
- * @access public
  * @author Jose Diaz-Gonzalez
  */
 	public function link($title, $url = null, $options = array(), $confirmMessage = false) {
-		if (!is_array($url)) return $this->Html->link($title, $url, $options, $confirmMessage);
+		if (!is_array($url)) {
+			return $this->Html->link($title, $url, $options, $confirmMessage);
+		}
 
-		if (!isset($url['plugin']) && !empty($url['plugin'])) $url['plugin'] = $this->params['plugin'];
-		if (!isset($url['controller']) && empty($url['controller'])) $url['controller'] = $this->params['controller'];
-		if (!isset($url['action']) && empty($url['action'])) $url['action'] = $this->params['action'];
+		if (!isset($url['plugin']) && !empty($url['plugin'])) {
+			$url['plugin'] = $this->params['plugin'];
+		}
+
+		if (!isset($url['controller']) && empty($url['controller'])) {
+			$url['controller'] = $this->params['controller'];
+		}
+
+		if (!isset($url['action']) && empty($url['action'])) {
+			$url['action'] = $this->params['action'];
+		}
 
 		if (empty($this->routes)) {
 			$Permit =& PermitComponent::getInstance();
 			$this->routes = $Permit->routes;
 		}
 
-		if (empty($this->routes)) return $this->Html->link($title, $url, $options, $confirmMessage);
+		if (empty($this->routes)) {
+			return $this->Html->link($title, $url, $options, $confirmMessage);
+		}
 
 		foreach ($this->routes as $route) {
 			if ($this->parse($url, $route)) {
 				return $this->execute($route, $title, $url, $options, $confirmMessage);
-				break;
 			}
 		}
 
 		return $this->Html->link($title, $url, $options, $confirmMessage);
 	}
-
 
 /**
  * Parses the passed route against a rule
@@ -117,18 +123,19 @@ class ClearanceHelper extends AppHelper {
  * @param string $currentRoute route being testing
  * @param string $route route being tested against
  * @return void
- * @access public
  * @author Jose Diaz-Gonzalez
  */
 	public function parse(&$currentRoute, &$permit) {
 		$route = $permit['route'];
 
 		$count = count($route);
-		if ($count == 0) return false;
+		if ($count == 0) {
+			return false;
+		}
 
 		foreach ($route as $key => $value) {
 			if (isset($currentRoute[$key])) {
-				$values = (is_array($value)) ?  $value : array($value);
+				$values = (is_array($value)) ? $value : array($value);
 				foreach ($values as $k => $v) {
 					if ($currentRoute[$key] == $v) {
 						$count--;
@@ -139,7 +146,6 @@ class ClearanceHelper extends AppHelper {
 		return $count == 0;
 	}
 
-
 /**
  * Executes the route based on it's rules
  *
@@ -149,43 +155,53 @@ class ClearanceHelper extends AppHelper {
  * @param array $options Array of HTML attributes.
  * @param string $confirmMessage JavaScript confirmation message.
  * @return string An `<a />` element.
- * @access public
  * @author Jose Diaz-Gonzalez
  */
 	public function execute($route, $title, $url = null, $options = array(), $confirmMessage = false) {
-		if (empty($route['rules'])) return $this->Html->link($title, $url, $options, $confirmMessage);
+		if (empty($route['rules'])) {
+			return $this->Html->link($title, $url, $options, $confirmMessage);
+		}
 
 		if (isset($route['rules']['deny'])) {
 			return ($route['rules']['deny'] == true) ? null : $this->Html->link($title, $url, $options, $confirmMessage);
 		}
 
-		if (!isset($route['rules']['auth'])) return $this->Html->link($title, $url, $options, $confirmMessage);
+		if (!isset($route['rules']['auth'])) {
+			return $this->Html->link($title, $url, $options, $confirmMessage);
+		}
 
 		if (is_bool($route['rules']['auth'])) {
-			$is_authed = $this->Session->read("{$this->settings['path']}.{$this->settings['check']}");
+			$isAuthed = $this->Session->read("{$this->settings['path']}.{$this->settings['check']}");
 
-			if ($route['rules']['auth'] == true && !$is_authed) {
+			if ($route['rules']['auth'] == true && !$isAuthed) {
 				return;
 			}
-			if ($route['rules']['auth'] == false && $is_authed) {
+			if ($route['rules']['auth'] == false && $isAuthed) {
 				return;
 			}
 			return $this->Html->link($title, $url, $options, $confirmMessage);
 		}
 
 		$count = count($route['rules']['auth']);
-		if ($count == 0) return $this->Html->link($title, $url, $options, $confirmMessage);
+		if ($count == 0) {
+			return $this->Html->link($title, $url, $options, $confirmMessage);
+		}
 
 		if (($user = $this->Session->read("{$this->settings['path']}")) == false) {
 			return;
 		}
 
 		foreach ($route['rules']['auth'] as $field => $value) {
-			if (strpos($field,'.')!==false) $field = '/'.str_replace('.','/',$field);
+			if (strpos($field, '.') !== false) {
+				$field = '/' . str_replace('.', '/', $field);
+			}
+
 			if ($field[0] == "/") {
-				$values = (array) Set::extract($field, $user);
+				$values = (array)Set::extract($field, $user);
 				foreach ($value as $condition) {
-					if (in_array($condition, $values)) $count--;
+					if (in_array($condition, $values)) {
+						$count--;
+					}
 				}
 			} else {
 				if ($user[$field] == $value) {
@@ -198,4 +214,3 @@ class ClearanceHelper extends AppHelper {
 	}
 
 }
-?>

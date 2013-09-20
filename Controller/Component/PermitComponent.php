@@ -10,7 +10,9 @@ App::uses('Set', 'Utility');
  *
  * @package       Sanction.Controller.Component
  */
-class PermitException extends CakeException { }
+class PermitException extends CakeException {
+
+}
 
 /**
  * Permit component class
@@ -59,20 +61,14 @@ class PermitComponent extends Component {
  *
  * @param boolean
  */
-	public $_user = null;
-
-/**
- * Current request parameters
- *
- * @param array
- */
-	public $_requestParams = array();
+	public $user = null;
 
 /**
  * Constructor.
  *
  * @param ComponentCollection $collection
  * @param array $settings
+ * @throws PermitException
  */
 	public function __construct(ComponentCollection $collection, $settings = array()) {
 		$this->settings['permit_include_path'] = APP . 'Config' . DS . 'permit.php';
@@ -84,7 +80,7 @@ class PermitComponent extends Component {
 			}
 
 			try {
-				include $settings['permit_include_path'] ;
+				include $settings['permit_include_path'];
 			} catch (Exception $e) {
 				throw new PermitException("File containing permissions not found.  It should be located at " . APP . 'config' . DS . "permit.php");
 			}
@@ -99,17 +95,16 @@ class PermitComponent extends Component {
  *
  * @param object $controller A reference to the instantiating controller object
  * @return void
- * @access public
  */
 	public function initialize(Controller $controller) {
 		if ($this->settings['isTest']) {
 			return;
 		}
 
-		$this->_user = $this->Session->read("{$this->settings['path']}");
+		$this->user = $this->Session->read("{$this->settings['path']}");
 
 		$this->routes = Permit::$routes;
-		Permit::$user = $this->_user;
+		Permit::$user = $this->user;
 
 		$this->request = $controller->request;
 
@@ -120,16 +115,14 @@ class PermitComponent extends Component {
 		}
 	}
 
-
 /**
  * Main execution method.  Handles redirecting of invalid users, and saving
  * of request url as Sanction.referer
  *
  * @param object $controller A reference to the instantiating controller object
  * @return boolean
- * @access public
  */
-	function startup(Controller $controller) {
+	public function startup(Controller $controller) {
 		if ($this->settings['isTest']) {
 			return;
 		}
@@ -148,15 +141,15 @@ class PermitComponent extends Component {
 		}
 	}
 
-	function _ensureHere() {
-		if (empty($this->_here) || empty($this->_here_query)) {
+	protected function _ensureHere() {
+		if (empty($this->_here) || empty($this->_hereQuery)) {
 			$this->_here = rtrim(preg_replace(
 				'/^' . preg_quote($this->request->base, '/') . '/',
 				'',
 				$this->request->here,
 				1
 			), '/');
-			$this->_here_query = rtrim($this->request->here(false), '/');
+			$this->_hereQuery = rtrim($this->request->here(false), '/');
 		}
 	}
 
@@ -166,16 +159,15 @@ class PermitComponent extends Component {
  * @param object $controller A reference to the instantiating controller object
  * @param array $route A Permit Route
  * @return boolean true if current request matches Permit route, false otherwise
- * @access protected
  */
-	function _parse($route) {
+	protected function _parse($route) {
 		if (is_string($route)) {
 			$this->_ensureHere();
 
 			$url = parse_url($route);
 			$_path = rtrim($url['path'], '/');
 			$_query = isset($url['query']) ? $url['query'] : '';
-			if ($_path . '?' . $_query === $this->_here_query) {
+			if ($_path . '?' . $_query === $this->_hereQuery) {
 				return true;
 			}
 
@@ -193,8 +185,8 @@ class PermitComponent extends Component {
 
 		foreach ($route as $key => $value) {
 			if (array_key_exists($key, $this->request->params)) {
-				$values = (array) $value;
-				$check = (array) $this->request->params[$key];
+				$values = (array)$value;
+				$check = (array)$this->request->params[$key];
 
 				$hasNullValues = (count($values) != count(array_filter($values)) || count($values) == 0);
 				$currentValueIsNullish = (in_array(null, $check) || in_array('', $check) || count($check) == 0);
@@ -212,7 +204,6 @@ class PermitComponent extends Component {
 						$check[$k] = strtolower($_check);
 					}
 				}
-
 
 				if (count($values) > 0) {
 					foreach ($values as $k => $v) {
@@ -237,7 +228,7 @@ class PermitComponent extends Component {
  * @param array $route A Permit Route
  * @return boolean True if redirect should be executed, false otherwise
  */
-	function _execute($route) {
+	protected function _execute($route) {
 		Permit::$executed = $this->executed = $route;
 
 		if (empty($route['rules'])) {
@@ -253,13 +244,13 @@ class PermitComponent extends Component {
 		}
 
 		if (is_bool($route['rules']['auth'])) {
-			$is_authed = $this->Session->read("{$this->settings['path']}.{$this->settings['check']}");
+			$isAuthed = $this->Session->read("{$this->settings['path']}.{$this->settings['check']}");
 
-			if ($route['rules']['auth'] == true && !$is_authed) {
+			if ($route['rules']['auth'] == true && !$isAuthed) {
 				return true;
 			}
 
-			if ($route['rules']['auth'] == false && $is_authed) {
+			if ($route['rules']['auth'] == false && $isAuthed) {
 				return true;
 			}
 
@@ -268,7 +259,7 @@ class PermitComponent extends Component {
 			return false;
 		}
 
-		if ($this->_user == false) {
+		if ($this->user == false) {
 			return true;
 		}
 
@@ -289,11 +280,11 @@ class PermitComponent extends Component {
 			$check = $condition;
 			$continue = false;
 			$decrement = 1;
-			$values = Set::extract($path, $this->_user);
+			$values = Set::extract($path, $this->user);
 
 			// Support for OR Model-syntax
 			foreach (array('or', 'OR') as $anOr) {
-				if (isset($condition[$anOr])) {
+				if (is_array($condition) && array_key_exists($anOr, $condition)) {
 					$check = $condition[$anOr];
 					$continue = true;
 					$decrement = count($check);
@@ -306,8 +297,8 @@ class PermitComponent extends Component {
 				$decrement = count($check);
 			}
 
-			foreach ((array) $check as $cond) {
-				if (in_array($cond, (array) $values)) {
+			foreach ((array)$check as $cond) {
+				if (in_array($cond, (array)$values)) {
 					$count -= $decrement;
 					if ($continue) {
 						continue 2;
@@ -326,7 +317,7 @@ class PermitComponent extends Component {
  * @param array $route A Permit Route
  * @return void
  */
-	function redirect(&$controller, $route) {
+	public function redirect(&$controller, $route) {
 		if ($route['message'] != null) {
 			$message = $route['message'];
 			$element = $route['element'];
@@ -345,7 +336,7 @@ class PermitComponent extends Component {
  * @param array $redirect Array containing the url to redirect to on route fail
  * @return array Array of connected routes
  */
-	function access($route, $rules = array(), $redirect = array()) {
+	public function access($route, $rules = array(), $redirect = array()) {
 		$this->routes[] = Permit::access($route, $rules, $redirect);
 	}
 
@@ -354,9 +345,8 @@ class PermitComponent extends Component {
  *
  * @param mixed $default Default URL to use if Session cannot be read
  * @return string Referring URL
- * @access public
  */
-	function referer($referer = null) {
+	public function referer($referer = null) {
 		if ($this->Session->check('Sanction.referer')) {
 			$referer = $this->Session->read('Sanction.referer');
 			$this->Session->delete('Sanction.referer');
@@ -381,10 +371,13 @@ class PermitComponent extends Component {
  */
 class Permit extends Object {
 
-	static $executed = null;
-	static $routes = array();
-	static $settings = null;
-	static $user = null;
+	public static $executed = null;
+
+	public static $routes = array();
+
+	public static $settings = null;
+
+	public static $user = null;
 
 /**
  * Connects a route to a given ruleset

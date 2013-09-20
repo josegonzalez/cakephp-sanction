@@ -1,4 +1,6 @@
-# Sanction Plugin for CakePHP [![Build Status](https://travis-ci.org/josegonzalez/sanction.png?branch=master)](https://travis-ci.org/josegonzalez/sanction)
+[![Build Status](https://travis-ci.org/josegonzalez/sanction.png?branch=master)](https://travis-ci.org/josegonzalez/sanction) [![Coverage Status](https://coveralls.io/repos/josegonzalez/sanction/badge.png?branch=master)](https://coveralls.io/r/josegonzalez/sanction?branch=master) [![Total Downloads](https://poser.pugx.org/josegonzalez/sanction/d/total.png)](https://packagist.org/packages/josegonzalez/sanction) [![Latest Stable Version](https://poser.pugx.org/josegonzalez/sanction/v/stable.png)](https://packagist.org/packages/josegonzalez/sanction)
+
+# Sanction Plugin for CakePHP
 
 Centralize all of those permissions in a single file using the Sanction plugin.
 
@@ -13,7 +15,18 @@ Sanction is the culmination of lots of auth work on CakePackages. I was using th
 
 ## Installation
 
-For 1.3 support, please see the [1.3 branch](https://github.com/josegonzalez/sanction/tree/1.3).
+
+_[Using [Composer](http://getcomposer.org/)]_
+
+Add the plugin to your project's `composer.json` - something like this:
+
+	{
+		"require": {
+			"josegonzalez/sanction": "dev-master"
+		}
+	}
+
+Because this plugin has the type `cakephp-plugin` set in it's own `composer.json`, composer knows to install it inside your `/Plugins` directory, rather than in the usual vendors file. It is recommended that you add `/Plugins/Upload` to your .gitignore file. (Why? [read this](http://getcomposer.org/doc/faqs/should-i-commit-the-dependencies-in-my-vendor-directory.md).)
 
 _[Manual]_
 
@@ -360,7 +373,9 @@ If you want to add additional settings to individual data retrieval calls, there
 
 ## License
 
-Copyright (c) 2010-2012 Jose Diaz-Gonzalez
+The MIT License (MIT)
+
+Copyright (c) 2010 Jose Diaz-Gonzalez
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
