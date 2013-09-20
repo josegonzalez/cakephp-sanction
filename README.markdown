@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/josegonzalez/sanction.png?branch=master)](https://travis-ci.org/josegonzalez/sanction) [![Coverage Status](https://coveralls.io/repos/josegonzalez/sanction/badge.png?branch=master)](https://coveralls.io/r/josegonzalez/sanction?branch=master) [![Total Downloads](https://poser.pugx.org/josegonzalez/sanction/d/total.png)](https://packagist.org/packages/josegonzalez/sanction) [![Latest Stable Version](https://poser.pugx.org/josegonzalez/sanction/v/stable.png)](https://packagist.org/packages/josegonzalez/sanction)
+[![Build Status](https://travis-ci.org/josegonzalez/cakephp-sanction.png?branch=master)](https://travis-ci.org/josegonzalez/cakephp-sanction) [![Coverage Status](https://coveralls.io/repos/josegonzalez/cakephp-sanction/badge.png?branch=master)](https://coveralls.io/r/josegonzalez/cakephp-sanction?branch=master) [![Total Downloads](https://poser.pugx.org/josegonzalez/cakephp-sanction/d/total.png)](https://packagist.org/packages/josegonzalez/cakephp-sanction) [![Latest Stable Version](https://poser.pugx.org/josegonzalez/cakephp-sanction/v/stable.png)](https://packagist.org/packages/josegonzalez/cakephp-sanction)
 
 # Sanction Plugin for CakePHP
 
@@ -15,14 +15,13 @@ Sanction is the culmination of lots of auth work on CakePackages. I was using th
 
 ## Installation
 
-
 _[Using [Composer](http://getcomposer.org/)]_
 
 Add the plugin to your project's `composer.json` - something like this:
 
 	{
 		"require": {
-			"josegonzalez/sanction": "dev-master"
+			"josegonzalez/cakephp-sanction": "dev-master"
 		}
 	}
 
@@ -30,7 +29,7 @@ Because this plugin has the type `cakephp-plugin` set in it's own `composer.json
 
 _[Manual]_
 
-* Download this: [https://github.com/josegonzalez/sanction/zipball/master](https://github.com/josegonzalez/sanction/zipball/master)
+* Download this: [https://github.com/josegonzalez/cakephp-sanction/zipball/master](https://github.com/josegonzalez/cakephp-sanction/zipball/master)
 * Unzip that download.
 * Copy the resulting folder to `app/Plugin`
 * Rename the folder you just copied to `Sanction`
@@ -39,7 +38,7 @@ _[GIT Submodule]_
 
 In your app directory type:
 
-	git submodule add git://github.com/josegonzalez/sanction.git Plugin/Sanction
+	git submodule add git://github.com/josegonzalez/cakephp-sanction.git Plugin/Sanction
 	git submodule init
 	git submodule update
 
@@ -47,7 +46,7 @@ _[GIT Clone]_
 
 In your plugin directory type
 
-	git clone git://github.com/josegonzalez/sanction.git Sanction
+	git clone git://github.com/josegonzalez/cakephp-sanction.git Sanction
 
 ### Enable plugin
 

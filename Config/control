@@ -1,9 +1,0 @@
-Package: sanction
-Source: git://github.com/josegonzalez/sanction.git
-Type: plugin
-Section: authorization
-Description: give sanction to your users when they intend to navigate to certain portions of your website
-Pre-depends: CakePHP==1.3
-Suggests: cakephp-authsome
-Homepage: http://github.com/josegonzalez/sanction
-Bugs: http://github.com/josegonzalez/sanction/issues

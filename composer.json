@@ -1,5 +1,5 @@
 {
-  "name": "josegonzalez/sanction",
+  "name": "josegonzalez/cakephp-sanction",
   "version": "2.0.2",
   "description": "Centralize all of those permissions in a single file using the Sanction plugin.",
   "type": "cakephp-plugin",
@@ -8,11 +8,11 @@
   	"authorization",
   	"auth"
   ],
-  "homepage": "http://github.com/josegonzalez/sanction",
+  "homepage": "http://github.com/josegonzalez/cakephp-sanction",
   "license": "MIT",
   "authors": [
     {
-      "name": "Jose Gonzalez",
+      "name": "Jose Diaz-Gonzalez",
       "email": "email@josediazgonzalez.com",
       "homepage": "http://josediazgonzalez.com",
       "role": "Maintainer"
@@ -48,8 +48,8 @@
   },
   "support": {
     "email": "cakephp+sanction@josediazgonzalez.com",
-    "issues": "https://github.com/josegonzalez/sanction/issues",
-    "source": "https://github.com/josegonzalez/sanction"
+    "issues": "https://github.com/josegonzalez/cakephp-sanction/issues",
+    "source": "https://github.com/josegonzalez/cakephp-sanction"
   },
   "extra": {
     "installer-name": "Sanction"

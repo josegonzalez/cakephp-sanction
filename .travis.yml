@@ -7,7 +7,7 @@ php:
 
 env:
   global:
-    - REPO_NAME=sanction
+    - REPO_NAME="cakephp-sanction"
     - PLUGIN_NAME=Sanction
   matrix:
     - DB=mysql CAKE_VERSION=master
