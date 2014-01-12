@@ -426,7 +426,7 @@ class PermitTest extends CakeTestCase {
 		$testRoute = array(
 			'controller' => 'pages',
 			'action' => 'display',
-			(int) 0 => 'home'
+			(int)0 => 'home'
 		);
 		$this->assertTrue($this->protectedMethodCall($this->Permit, '_parse', array($testRoute)));
 	}
