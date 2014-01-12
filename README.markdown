@@ -367,7 +367,6 @@ If you want to add additional settings to individual data retrieval calls, there
 ## Todo
 
 * More Unit Tests
-* Document the Access Plugin
 * Support yaml/db-backed Permit Component permission loading
 
 ## License
