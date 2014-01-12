@@ -5,13 +5,16 @@ App::uses('CakeLog', 'Log');
 
 class SanctionPermission extends SanctionAppModel {
 
- /**
-	* Array of rules upon which we will control access
-	* Array of rules by which the User's session must be defined by
-	*  - If you restrict to a single model and don't use associated data, you can enter just the fieldname to match on in the Auth array
-	*  - If you use associated models, you need to specify a Set::extract() path as the fieldname
-	* Array of extra parameters, such as where to redirect, the flash message, etc.
-	*/
+/**
+ * Save a new permission to the database
+ *
+ * @param array rules upon which we will control access
+ * @param array rules by which the User's session must be defined by
+ *              - If you restrict to a single model and don't use associated data, you can enter just the fieldname to match on in the Auth array
+ *              - If you use associated models, you need to specify a Set::extract() path as the fieldname
+ * @param array extra parameters, such as where to redirect, the flash message, etc.
+ * @return boolean result of Model::save()
+ */
 	public function savePermission($route, $rules = array(), $redirect = array()) {
 		return $this->save(array(
 			'route' => json_encode($route),

@@ -15,18 +15,18 @@ class SanctionPermissionsController extends SanctionAppController {
 		if (!in_array($type, array('plugin', 'controller', 'action'))) {
 			return $this->set(array(
 				'_serialize' => array('message', 'status'),
-				'message' => sprintf('Invalid type \'%s\'', $type)
-				'status' => 400
+				'message' => sprintf('Invalid type \'%s\'', $type),
+				'status' => 400,
 			));
 		}
 
 		return $this->set(array(
 			'status' => 200,
-			Inflector::pluralize($type) => $this->fetch($type);
-		))
+			Inflector::pluralize($type) => $this->_fetch($type),
+		));
 	}
 
-	protected function fetch($type) {
+	protected function _fetch($type) {
 		$plugin = $this->request->query('plugin');
 		$controller = $this->request->query('controller');
 
