@@ -21,7 +21,7 @@ Add the plugin to your project's `composer.json` - something like this:
 
 	{
 		"require": {
-			"josegonzalez/cakephp-sanction": "dev-master"
+			"josegonzalez/cakephp-sanction": "2.1.0"
 		}
 	}
 
