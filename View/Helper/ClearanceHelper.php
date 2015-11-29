@@ -125,7 +125,7 @@ class ClearanceHelper extends AppHelper {
  * @return void
  * @author Jose Diaz-Gonzalez
  */
-	public function parse(&$currentRoute, &$permit) {
+	public function parse($currentRoute, $permit) {
 		$route = $permit['route'];
 
 		$count = count($route);

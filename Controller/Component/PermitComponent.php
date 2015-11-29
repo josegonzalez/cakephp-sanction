@@ -161,7 +161,6 @@ class PermitComponent extends Component {
 /**
  * Parses a given Permit route to see if it matches the current request
  *
- * @param object $controller A reference to the instantiating controller object
  * @param array $route A Permit Route
  * @return bool true if current request matches Permit route, false otherwise
  */
@@ -327,7 +326,7 @@ class PermitComponent extends Component {
  * @param array $route A Permit Route
  * @return void
  */
-	public function redirect(Controller $controller, $route) {
+	public function redirect(Controller $Controller, $route) {
 		if ($route['message'] != null) {
 			$message = $route['message'];
 			$element = $route['element'];
@@ -335,7 +334,7 @@ class PermitComponent extends Component {
 			$this->Session->write("Message.{$route['key']}", compact('message', 'element', 'params'));
 		}
 
-		$controller->redirect($route['redirect']);
+		$Controller->redirect($route['redirect']);
 	}
 
 /**
