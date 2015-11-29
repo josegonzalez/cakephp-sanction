@@ -59,15 +59,15 @@ class PermitComponent extends Component {
 /**
  * Maintains current logged in user.
  *
- * @param boolean
+ * @param bool
  */
 	public $user = null;
 
 /**
  * Constructor.
  *
- * @param ComponentCollection $collection
- * @param array $settings
+ * @param ComponentCollection $collection Collection instance.
+ * @param array $settings Array of settings.
  * @throws PermitException
  */
 	public function __construct(ComponentCollection $collection, $settings = array()) {
@@ -120,7 +120,7 @@ class PermitComponent extends Component {
  * of request url as Sanction.referer
  *
  * @param object $controller A reference to the instantiating controller object
- * @return boolean
+ * @return bool
  */
 	public function startup(Controller $controller) {
 		if ($this->settings['isTest']) {
@@ -141,6 +141,11 @@ class PermitComponent extends Component {
 		}
 	}
 
+/**
+ * Ensure both $this->_here and $this->_hereQuery are set
+ *
+ * @return void
+ */
 	protected function _ensureHere() {
 		if (empty($this->_here) || empty($this->_hereQuery)) {
 			$this->_here = rtrim(preg_replace(
@@ -158,7 +163,7 @@ class PermitComponent extends Component {
  *
  * @param object $controller A reference to the instantiating controller object
  * @param array $route A Permit Route
- * @return boolean true if current request matches Permit route, false otherwise
+ * @return bool true if current request matches Permit route, false otherwise
  */
 	protected function _parse($route) {
 		if (is_string($route)) {
@@ -166,7 +171,7 @@ class PermitComponent extends Component {
 
 			$url = parse_url($route);
 			$_path = rtrim($url['path'], '/');
-			if ($_path . '?' . Hash::get($url, 'query') === $this->_here_query) {
+			if ($_path . '?' . Hash::get($url, 'query') === $this->_hereQuery) {
 				return true;
 			}
 
@@ -231,7 +236,7 @@ class PermitComponent extends Component {
  * a failed request depends upon the options for the route
  *
  * @param array $route A Permit Route
- * @return boolean True if redirect should be executed, false otherwise
+ * @return bool True if redirect should be executed, false otherwise
  */
 	protected function _execute($route) {
 		Permit::$executed = $this->executed = $route;
@@ -318,11 +323,11 @@ class PermitComponent extends Component {
 /**
  * Performs a redirect based upon a given route
  *
- * @param object $controller A reference to the instantiating controller object
+ * @param Controller|object $Controller A reference to the instantiating controller object
  * @param array $route A Permit Route
  * @return void
  */
-	public function redirect(&$controller, $route) {
+	public function redirect(Controller $controller, $route) {
 		if ($route['message'] != null) {
 			$message = $route['message'];
 			$element = $route['element'];
@@ -348,7 +353,7 @@ class PermitComponent extends Component {
 /**
  * Returns the referring URL for this request.
  *
- * @param mixed $default Default URL to use if Session cannot be read
+ * @param mixed $referer Default URL to use if Session cannot be read
  * @return string Referring URL
  */
 	public function referer($referer = null) {

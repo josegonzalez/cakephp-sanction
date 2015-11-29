@@ -55,7 +55,7 @@ class PermitBehavior extends ModelBehavior {
 /**
  * beforeFind Callback
  *
- * @param Model $model Model find is being run on.
+ * @param Model $Model Model find is being run on.
  * @param array $query Array of Query parameters.
  * @return array Modified query
  */
@@ -93,7 +93,7 @@ class PermitBehavior extends ModelBehavior {
  *
  * @param Model $model Model find was run on
  * @param array $results Array of model results.
- * @param boolean $primary Did the find originate on $model.
+ * @param bool $primary Did the find originate on $model.
  * @return array Modified results
  * @throws UnauthorizedException
  */
@@ -137,6 +137,7 @@ class PermitBehavior extends ModelBehavior {
  *
  * Can be overriden in the Model to provide advanced control
  *
+ * @param Model $model Model to use to retrieve user
  * @param array $result single Model record being authenticated against
  * @param string $key field to retrieve.  Leave null to get entire User record
  * @return mixed User record. or null if no user is logged in.
@@ -168,6 +169,7 @@ class PermitBehavior extends ModelBehavior {
 /**
  * Used to dynamically assign permit settings
  *
+ * @param Model $model Model to dynamically assign permissions on
  * @param array $settings same as the settings used to set-up the model, with the addition of 'persist' (boolean), which will keep the passed settings for all future model calls
  * @return void
  */
