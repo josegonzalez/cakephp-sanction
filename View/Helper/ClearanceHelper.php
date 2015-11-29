@@ -121,7 +121,7 @@ class ClearanceHelper extends AppHelper {
  * Parses the passed route against a rule
  *
  * @param string $currentRoute route being testing
- * @param string $route route being tested against
+ * @param string $permit Permit variable that contains a route being tested against
  * @return void
  * @author Jose Diaz-Gonzalez
  */
